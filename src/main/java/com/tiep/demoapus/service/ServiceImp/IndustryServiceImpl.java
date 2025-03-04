@@ -3,7 +3,6 @@ package com.tiep.demoapus.service.ServiceImp;
 import com.tiep.demoapus.entity.Industry;
 import com.tiep.demoapus.repository.IndustryRepository;
 import com.tiep.demoapus.service.IIndustryService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -12,14 +11,14 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Triển khai các phương thức của IIndustryService.
- */
 @Service
-public class IndustryServiceImplement implements IIndustryService {
+public class IndustryServiceImpl implements IIndustryService {
 
-    @Autowired
-    private IndustryRepository industryRepository;
+    private final IndustryRepository industryRepository;
+
+    public IndustryServiceImpl(IndustryRepository industryRepository) {
+        this.industryRepository = industryRepository;
+    }
 
     @Override
     public List<Industry> getAllIndustries() {
@@ -40,7 +39,6 @@ public class IndustryServiceImplement implements IIndustryService {
         }
         return industryRepository.save(industry);
     }
-
 
     @Override
     public Industry updateIndustry(Industry industry) {
@@ -68,17 +66,12 @@ public class IndustryServiceImplement implements IIndustryService {
 
     @Override
     public Page<Industry> getIndustries(int page, int size, String sort) {
-        // Chuyển chuỗi sort ("createdAt,DESC") thành đối tượng Sort
         String[] sortParams = sort.split(":");
         String sortBy = sortParams[0];
         Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("DESC")
                 ? Sort.Direction.DESC
                 : Sort.Direction.ASC;
-
-        // Tạo Pageable object
         PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
-        // Gọi repository để lấy dữ liệu có phân trang
         return industryRepository.findAll(pageable);
     }
 }

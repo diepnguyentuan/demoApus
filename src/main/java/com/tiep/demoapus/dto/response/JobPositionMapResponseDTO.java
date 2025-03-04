@@ -1,34 +1,31 @@
 package com.tiep.demoapus.dto.response;
 
+import java.util.List;
 
 public class JobPositionMapResponseDTO {
-    private DepartmentResponseDTO department;
-    private PositionResponseDTO position;
+    private Long departmentId;
+    private List<Long> positionIds;
 
-    // Constructors
-    public JobPositionMapResponseDTO() {}
-
-    public JobPositionMapResponseDTO(DepartmentResponseDTO department, PositionResponseDTO position) {
-        this.department = department;
-        this.position = position;
+    public JobPositionMapResponseDTO(Long departmentId, List<Long> positionIds) {
+        this.departmentId = departmentId;
+        this.positionIds = positionIds;
     }
 
-    // Getters and Setters
+    // Getters & Setters
 
-    public DepartmentResponseDTO getDepartment() {
-        return department;
+    public Long getDepartmentId() {
+        return departmentId;
     }
 
-    public void setDepartment(DepartmentResponseDTO department) {
-        this.department = department;
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 
-    public PositionResponseDTO getPosition() {
-        return position;
+    public List<Long> getPositionIds() {
+        return positionIds;
     }
 
-    public void setPosition(PositionResponseDTO position) {
-        this.position = position;
+    public void setPositionIds(List<Long> positionIds) {
+        this.positionIds = positionIds;
     }
 }
-

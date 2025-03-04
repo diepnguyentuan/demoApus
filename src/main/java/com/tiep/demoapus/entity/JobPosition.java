@@ -1,10 +1,13 @@
 package com.tiep.demoapus.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+@Data
 @Entity
 @Table(name = "job_position")
 public class JobPosition {
@@ -22,96 +25,42 @@ public class JobPosition {
     private Industry industry;
 
     @OneToMany(mappedBy = "jobPosition", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<JobPositionMap> jobPositionMaps;
+    private List<JobPositionMap> jobPositionMaps = new ArrayList<>(); // Đảm bảo không bị null
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     public JobPosition() {}
-    public JobPosition(Long id, String code, String name, String description, boolean active, Industry industry, LocalDateTime createdAt, LocalDateTime updatedAt) {
+
+    public JobPosition(Long id, String code, String name, String description, boolean active, Industry industry) {
         this.id = id;
         this.code = code;
         this.name = name;
         this.description = description;
         this.active = active;
         this.industry = industry;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public Industry getIndustry() {
-        return industry;
-    }
-
-    public void setIndustry(Industry industry) {
-        this.industry = industry;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
+    // Getter & Setter đảm bảo không bị null
     public List<JobPositionMap> getJobPositionMaps() {
-        return jobPositionMaps;
+        return jobPositionMaps != null ? jobPositionMaps : new ArrayList<>();
     }
 
     public void setJobPositionMaps(List<JobPositionMap> jobPositionMaps) {
         this.jobPositionMaps = jobPositionMaps;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt != null ? createdAt : LocalDateTime.now();
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt != null ? updatedAt : LocalDateTime.now();
     }
 
     @PrePersist

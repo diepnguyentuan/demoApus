@@ -3,12 +3,11 @@ package com.tiep.demoapus.controller;
 import com.tiep.demoapus.dto.request.IndustryRequestDTO;
 import com.tiep.demoapus.dto.response.IndustryResponseDTO;
 import com.tiep.demoapus.dto.response.ResponseWrapper;
-import com.tiep.demoapus.mapper.IndustryMapper;
 import com.tiep.demoapus.entity.Industry;
+import com.tiep.demoapus.mapper.IndustryMapper;
 import com.tiep.demoapus.service.IIndustryService;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,17 +16,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Controller quản lý các API liên quan đến Industry.
- * Bao gồm các API: lấy danh sách, lấy theo id, thêm mới, cập nhật và xóa.
- */
 @RestController
 @RequestMapping("api/v1/industry")
 @Tag(name = "Quản lý ngành nghề")
 public class IndustryController {
 
-    @Autowired
-    private IIndustryService industryService;
+    private final IIndustryService industryService;
+
+    public IndustryController(IIndustryService industryService) {
+        this.industryService = industryService;
+    }
 
     @Operation(summary = "Lấy danh sách ngành nghề", description = "Trả về danh sách tất cả các ngành nghề có phân trang")
     @GetMapping("/list")
@@ -36,13 +34,9 @@ public class IndustryController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt:DESC") String sort) {
 
-        // Lấy danh sách Industry từ service có phân trang
         Page<Industry> industries = industryService.getIndustries(page, size, sort);
-
-        // Chuyển đổi danh sách Industry thành DTO
         List<IndustryResponseDTO> content = IndustryMapper.toDTOList(industries.getContent());
 
-        // Đóng gói dữ liệu theo format mong muốn
         Map<String, Object> response = new HashMap<>();
         response.put("content", content);
         response.put("page", industries.getNumber());
@@ -54,7 +48,6 @@ public class IndustryController {
 
         return ResponseEntity.ok(new ResponseWrapper(response));
     }
-
 
     @Operation(summary = "Lấy ngành nghề theo ID")
     @GetMapping("/{id}")

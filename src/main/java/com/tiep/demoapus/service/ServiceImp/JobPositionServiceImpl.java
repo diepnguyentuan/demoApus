@@ -12,26 +12,20 @@ import com.tiep.demoapus.repository.JobPositionMapRepository;
 import com.tiep.demoapus.repository.JobPositionRepository;
 import com.tiep.demoapus.service.JobPositionService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class JobPositionServiceImpl implements JobPositionService {
+
     private final JobPositionRepository jobPositionRepository;
     private final IndustryRepository industryRepository;
     private final JobPositionMapRepository jobPositionMapRepository;
-
-    @Autowired
-    public JobPositionServiceImpl(
-            JobPositionRepository jobPositionRepository,
-            IndustryRepository industryRepository,
-            JobPositionMapRepository jobPositionMapRepository) {
-        this.jobPositionRepository = jobPositionRepository;
-        this.industryRepository = industryRepository;
-        this.jobPositionMapRepository = jobPositionMapRepository;
-    }
+    private final JobPositionMapper jobPositionMapper;
 
     @Override
     @Transactional
@@ -45,30 +39,39 @@ public class JobPositionServiceImpl implements JobPositionService {
         jobPosition.setDescription(requestDTO.getDescription());
         jobPosition.setActive(requestDTO.isActive());
         jobPosition.setIndustry(industry);
+        jobPosition.setCreatedAt(LocalDateTime.now());
+        jobPosition.setUpdatedAt(LocalDateTime.now());
 
         jobPosition = jobPositionRepository.save(jobPosition);
 
-        // Tạo các bản ghi trong JobPositionMap
         if (requestDTO.getDepartmentPositions() != null) {
             for (DepartmentPositionDTO departmentPosition : requestDTO.getDepartmentPositions()) {
                 Long departmentId = departmentPosition.getDepartmentId();
-                for (Long positionId : departmentPosition.getPositionIds()) {
-                    JobPositionMap jobPositionMap = new JobPositionMap();
-                    jobPositionMap.setJobPosition(jobPosition);
-                    jobPositionMap.setDepartmentId(departmentId);
-                    jobPositionMap.setPositionId(positionId);
-                    jobPositionMapRepository.save(jobPositionMap);
+                if (departmentPosition.getPositionIds() != null) {
+                    for (Long positionId : departmentPosition.getPositionIds()) {
+                        JobPositionMap jobPositionMap = new JobPositionMap();
+                        jobPositionMap.setJobPosition(jobPosition);
+                        jobPositionMap.setDepartmentId(departmentId);
+                        jobPositionMap.setPositionId(positionId);
+                        jobPositionMapRepository.save(jobPositionMap);
+                    }
                 }
             }
         }
 
-        return JobPositionMapper.toDTO(jobPosition);
+        List<JobPositionMap> lines = jobPositionMapRepository.findByJobPositionId(jobPosition.getId());
+        return jobPositionMapper.toDTO(jobPosition, lines);
     }
+
     @Override
     public List<JobPositionResponseDTO> getAllJobPositions() {
         return jobPositionRepository.findAll()
-                .stream().map(JobPositionMapper::toDTO)
-                .collect(Collectors.toList());
+                .stream()
+                .map(job -> {
+                    List<JobPositionMap> lines = jobPositionMapRepository.findByJobPositionId(job.getId());
+                    return jobPositionMapper.toDTO(job, lines);
+                })
+                .toList();
     }
 
     @Override
@@ -85,27 +88,29 @@ public class JobPositionServiceImpl implements JobPositionService {
         jobPosition.setDescription(requestDTO.getDescription());
         jobPosition.setActive(requestDTO.isActive());
         jobPosition.setIndustry(industry);
+        jobPosition.setUpdatedAt(LocalDateTime.now());
 
         jobPosition = jobPositionRepository.save(jobPosition);
 
-        // Xóa tất cả các bản ghi JobPositionMap cũ liên quan đến JobPosition này
         jobPositionMapRepository.deleteByJobPositionId(id);
 
-        // Thêm các bản ghi JobPositionMap mới
         if (requestDTO.getDepartmentPositions() != null) {
             for (DepartmentPositionDTO departmentPosition : requestDTO.getDepartmentPositions()) {
                 Long departmentId = departmentPosition.getDepartmentId();
-                for (Long positionId : departmentPosition.getPositionIds()) {
-                    JobPositionMap jobPositionMap = new JobPositionMap();
-                    jobPositionMap.setJobPosition(jobPosition);
-                    jobPositionMap.setDepartmentId(departmentId);
-                    jobPositionMap.setPositionId(positionId);
-                    jobPositionMapRepository.save(jobPositionMap);
+                if (departmentPosition.getPositionIds() != null) {
+                    for (Long positionId : departmentPosition.getPositionIds()) {
+                        JobPositionMap jobPositionMap = new JobPositionMap();
+                        jobPositionMap.setJobPosition(jobPosition);
+                        jobPositionMap.setDepartmentId(departmentId);
+                        jobPositionMap.setPositionId(positionId);
+                        jobPositionMapRepository.save(jobPositionMap);
+                    }
                 }
             }
         }
 
-        return JobPositionMapper.toDTO(jobPosition);
+        List<JobPositionMap> lines = jobPositionMapRepository.findByJobPositionId(jobPosition.getId());
+        return jobPositionMapper.toDTO(jobPosition, lines);
     }
 
     @Override
@@ -114,11 +119,7 @@ public class JobPositionServiceImpl implements JobPositionService {
         if (!jobPositionRepository.existsById(id)) {
             throw new RuntimeException("JobPosition not found");
         }
-
-        // Xóa tất cả các bản ghi JobPositionMap liên quan
         jobPositionMapRepository.deleteByJobPositionId(id);
-
-        // Xóa JobPosition
         jobPositionRepository.deleteById(id);
     }
 
@@ -126,7 +127,7 @@ public class JobPositionServiceImpl implements JobPositionService {
     public JobPositionResponseDTO getJobPositionById(Long id) {
         JobPosition jobPosition = jobPositionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("JobPosition not found"));
-
-        return JobPositionMapper.toDTO(jobPosition);
+        List<JobPositionMap> lines = jobPositionMapRepository.findByJobPositionId(jobPosition.getId());
+        return jobPositionMapper.toDTO(jobPosition, lines);
     }
 }
