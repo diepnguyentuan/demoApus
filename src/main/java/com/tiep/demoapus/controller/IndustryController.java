@@ -86,7 +86,7 @@ public class IndustryController {
         industry.setActive(updateDTO.getIsActive());
         industry.setDescription(updateDTO.getDescription());
         Industry updatedIndustry = industryService.updateIndustry(industry);
-        return ResponseEntity.ok(updatedIndustry.getId());
+        return ResponseEntity.ok(Map.of("id", updatedIndustry.getId()));
     }
 
     @Operation(summary = "Xóa ngành nghề")

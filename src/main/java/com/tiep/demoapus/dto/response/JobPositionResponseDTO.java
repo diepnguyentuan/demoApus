@@ -8,7 +8,7 @@ public class JobPositionResponseDTO {
     private Long id;
     private String code;
     private String name;
-    private IndustryResponseDTO industry; // Đổi từ "major" sang "industry"
+    private IndustryResponseDTO industry;
     private String description;
 
     @JsonProperty("is_active")

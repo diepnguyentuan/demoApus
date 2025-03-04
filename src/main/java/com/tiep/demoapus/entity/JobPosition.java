@@ -51,9 +51,6 @@ public class JobPosition {
         return jobPositionMaps != null ? jobPositionMaps : new ArrayList<>();
     }
 
-    public void setJobPositionMaps(List<JobPositionMap> jobPositionMaps) {
-        this.jobPositionMaps = jobPositionMaps;
-    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt != null ? createdAt : LocalDateTime.now();

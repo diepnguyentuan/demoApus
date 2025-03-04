@@ -3,6 +3,8 @@ package com.tiep.demoapus.service.ServiceImp;
 import com.tiep.demoapus.entity.Industry;
 import com.tiep.demoapus.repository.IndustryRepository;
 import com.tiep.demoapus.service.IIndustryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -12,19 +14,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class IndustryServiceImpl implements IIndustryService {
 
-    private final IndustryRepository industryRepository;
-
-    public IndustryServiceImpl(IndustryRepository industryRepository) {
-        this.industryRepository = industryRepository;
-    }
+    @Autowired
+    IndustryRepository industryRepository;
 
     @Override
     public List<Industry> getAllIndustries() {
-        List<Industry> industries = industryRepository.findAll();
-        System.out.println("Số lượng ngành nghề tìm thấy: " + industries.size());
-        return industries;
+        return industryRepository.findAll();
     }
 
     @Override
@@ -34,14 +32,17 @@ public class IndustryServiceImpl implements IIndustryService {
 
     @Override
     public Industry addIndustry(Industry industry) {
+        LocalDateTime now = LocalDateTime.now();
         if (industry.getCreatedAt() == null) {
-            industry.setCreatedAt(LocalDateTime.now());
+            industry.setCreatedAt(now);
         }
+        industry.setUpdatedAt(now); // Luôn cập nhật thời gian cập nhật
         return industryRepository.save(industry);
     }
 
     @Override
     public Industry updateIndustry(Industry industry) {
+        industry.setUpdatedAt(LocalDateTime.now()); // Cập nhật thời gian trước khi lưu
         return industryRepository.save(industry);
     }
 

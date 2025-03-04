@@ -8,9 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/job-positions")
+@RequestMapping("api/v1/job-positions")
 public class JobPositionController {
     private final JobPositionService jobPositionService;
 
@@ -21,7 +22,7 @@ public class JobPositionController {
     @PostMapping("")
     public ResponseEntity<?> addJobPosition(@RequestBody JobPositionRequestDTO requestDTO) {
         JobPositionResponseDTO responseDTO = jobPositionService.addJobPosition(requestDTO);
-        return ResponseEntity.ok(new ResponseWrapper(responseDTO));
+        return ResponseEntity.ok(new ResponseWrapper(Map.of("id", responseDTO.getId())));
     }
 
     @GetMapping("/list")
