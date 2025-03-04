@@ -1,19 +1,21 @@
 package com.tiep.demoapus.service.ServiceImp;
 
-import com.tiep.demoapus.dto.request.DepartmentPositionDTO;
 import com.tiep.demoapus.dto.request.JobPositionRequestDTO;
 import com.tiep.demoapus.dto.response.JobPositionResponseDTO;
-import com.tiep.demoapus.entity.Industry;
-import com.tiep.demoapus.entity.JobPosition;
-import com.tiep.demoapus.entity.JobPositionMap;
+import com.tiep.demoapus.entity.JobPositionEntity;
+import com.tiep.demoapus.entity.JobPositionMapEntity;
 import com.tiep.demoapus.mapper.JobPositionMapper;
 import com.tiep.demoapus.repository.IndustryRepository;
 import com.tiep.demoapus.repository.JobPositionMapRepository;
 import com.tiep.demoapus.repository.JobPositionRepository;
 import com.tiep.demoapus.service.JobPositionService;
-import jakarta.transaction.Transactional;
+import com.tiep.demoapus.specification.JobPositionSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,88 +31,85 @@ public class JobPositionServiceImpl implements JobPositionService {
 
     @Override
     @Transactional
-    public JobPositionResponseDTO addJobPosition(JobPositionRequestDTO requestDTO) {
-        Industry industry = industryRepository.findById(requestDTO.getIndustryId())
+    public JobPositionResponseDTO addJobPosition(JobPositionRequestDTO dto) {
+        // Lấy Industry và validate
+        var industryEntity = industryRepository.findById(dto.getIndustryId())
                 .orElseThrow(() -> new RuntimeException("Industry not found"));
 
-        JobPosition jobPosition = new JobPosition();
-        jobPosition.setCode(requestDTO.getCode());
-        jobPosition.setName(requestDTO.getName());
-        jobPosition.setDescription(requestDTO.getDescription());
-        jobPosition.setActive(requestDTO.isActive());
-        jobPosition.setIndustry(industry);
-        jobPosition.setCreatedAt(LocalDateTime.now());
-        jobPosition.setUpdatedAt(LocalDateTime.now());
+        JobPositionEntity jobPositionEntity = new JobPositionEntity();
+        jobPositionEntity.setCode(dto.getCode());
+        jobPositionEntity.setName(dto.getName());
+        jobPositionEntity.setDescription(dto.getDescription());
+        jobPositionEntity.setActive(dto.isActive());
+        jobPositionEntity.setIndustryEntity(industryEntity);
+        jobPositionEntity.setCreatedAt(LocalDateTime.now());
+        jobPositionEntity.setUpdatedAt(LocalDateTime.now());
 
-        jobPosition = jobPositionRepository.save(jobPosition);
+        jobPositionEntity = jobPositionRepository.save(jobPositionEntity);
 
-        if (requestDTO.getDepartmentPositions() != null) {
-            for (DepartmentPositionDTO departmentPosition : requestDTO.getDepartmentPositions()) {
-                Long departmentId = departmentPosition.getDepartmentId();
-                if (departmentPosition.getPositionIds() != null) {
-                    for (Long positionId : departmentPosition.getPositionIds()) {
-                        JobPositionMap jobPositionMap = new JobPositionMap();
-                        jobPositionMap.setJobPosition(jobPosition);
-                        jobPositionMap.setDepartmentId(departmentId);
-                        jobPositionMap.setPositionId(positionId);
-                        jobPositionMapRepository.save(jobPositionMap);
-                    }
+        if (dto.getDepartmentPositions() != null) {
+            JobPositionEntity finalJobPositionEntity = jobPositionEntity;
+            dto.getDepartmentPositions().forEach(dp -> {
+                if (dp.getPositionIds() != null) {
+                    dp.getPositionIds().forEach(positionId -> {
+                        JobPositionMapEntity mapEntity = new JobPositionMapEntity();
+                        mapEntity.setJobPosition(finalJobPositionEntity);
+                        mapEntity.setDepartmentId(dp.getDepartmentId());
+                        mapEntity.setPositionId(positionId);
+                        jobPositionMapRepository.save(mapEntity);
+                    });
                 }
-            }
+            });
         }
 
-        List<JobPositionMap> lines = jobPositionMapRepository.findByJobPositionId(jobPosition.getId());
-        return jobPositionMapper.toDTO(jobPosition, lines);
+        List<JobPositionMapEntity> maps = jobPositionMapRepository.findByJobPositionId(jobPositionEntity.getId());
+        return jobPositionMapper.toDTO(jobPositionEntity, maps);
     }
 
     @Override
-    public List<JobPositionResponseDTO> getAllJobPositions() {
-        return jobPositionRepository.findAll()
-                .stream()
-                .map(job -> {
-                    List<JobPositionMap> lines = jobPositionMapRepository.findByJobPositionId(job.getId());
-                    return jobPositionMapper.toDTO(job, lines);
-                })
-                .toList();
+    public Page<JobPositionResponseDTO> getAllJobPositions(int page, int size, String sort, String search) {
+        Sort.Direction direction = sort.endsWith(":DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        String sortBy = sort.split(":")[0];
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Page<JobPositionEntity> pageData = jobPositionRepository.findAll(JobPositionSpecification.searchByCodeOrName(search), pageable);
+        return pageData.map(jobPositionEntity -> {
+            List<JobPositionMapEntity> maps = jobPositionMapRepository.findByJobPositionId(jobPositionEntity.getId());
+            return jobPositionMapper.toDTO(jobPositionEntity, maps);
+        });
     }
 
     @Override
     @Transactional
-    public JobPositionResponseDTO updateJobPosition(Long id, JobPositionRequestDTO requestDTO) {
-        JobPosition jobPosition = jobPositionRepository.findById(id)
+    public JobPositionResponseDTO updateJobPosition(Long id, JobPositionRequestDTO dto) {
+        JobPositionEntity jobPositionEntity = jobPositionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("JobPosition not found"));
-
-        Industry industry = industryRepository.findById(requestDTO.getIndustryId())
+        var industryEntity = industryRepository.findById(dto.getIndustryId())
                 .orElseThrow(() -> new RuntimeException("Industry not found"));
-
-        jobPosition.setCode(requestDTO.getCode());
-        jobPosition.setName(requestDTO.getName());
-        jobPosition.setDescription(requestDTO.getDescription());
-        jobPosition.setActive(requestDTO.isActive());
-        jobPosition.setIndustry(industry);
-        jobPosition.setUpdatedAt(LocalDateTime.now());
-
-        jobPosition = jobPositionRepository.save(jobPosition);
+        jobPositionEntity.setCode(dto.getCode());
+        jobPositionEntity.setName(dto.getName());
+        jobPositionEntity.setDescription(dto.getDescription());
+        jobPositionEntity.setActive(dto.isActive());
+        jobPositionEntity.setIndustryEntity(industryEntity);
+        jobPositionEntity.setUpdatedAt(LocalDateTime.now());
+        jobPositionEntity = jobPositionRepository.save(jobPositionEntity);
 
         jobPositionMapRepository.deleteByJobPositionId(id);
-
-        if (requestDTO.getDepartmentPositions() != null) {
-            for (DepartmentPositionDTO departmentPosition : requestDTO.getDepartmentPositions()) {
-                Long departmentId = departmentPosition.getDepartmentId();
-                if (departmentPosition.getPositionIds() != null) {
-                    for (Long positionId : departmentPosition.getPositionIds()) {
-                        JobPositionMap jobPositionMap = new JobPositionMap();
-                        jobPositionMap.setJobPosition(jobPosition);
-                        jobPositionMap.setDepartmentId(departmentId);
-                        jobPositionMap.setPositionId(positionId);
-                        jobPositionMapRepository.save(jobPositionMap);
-                    }
+        if (dto.getDepartmentPositions() != null) {
+            JobPositionEntity finalJobPositionEntity = jobPositionEntity;
+            dto.getDepartmentPositions().forEach(dp -> {
+                if (dp.getPositionIds() != null) {
+                    dp.getPositionIds().forEach(positionId -> {
+                        JobPositionMapEntity mapEntity = new JobPositionMapEntity();
+                        mapEntity.setJobPosition(finalJobPositionEntity);
+                        mapEntity.setDepartmentId(dp.getDepartmentId());
+                        mapEntity.setPositionId(positionId);
+                        jobPositionMapRepository.save(mapEntity);
+                    });
                 }
-            }
+            });
         }
-
-        List<JobPositionMap> lines = jobPositionMapRepository.findByJobPositionId(jobPosition.getId());
-        return jobPositionMapper.toDTO(jobPosition, lines);
+        List<JobPositionMapEntity> maps = jobPositionMapRepository.findByJobPositionId(jobPositionEntity.getId());
+        return jobPositionMapper.toDTO(jobPositionEntity, maps);
     }
 
     @Override
@@ -125,9 +124,9 @@ public class JobPositionServiceImpl implements JobPositionService {
 
     @Override
     public JobPositionResponseDTO getJobPositionById(Long id) {
-        JobPosition jobPosition = jobPositionRepository.findById(id)
+        JobPositionEntity jobPositionEntity = jobPositionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("JobPosition not found"));
-        List<JobPositionMap> lines = jobPositionMapRepository.findByJobPositionId(jobPosition.getId());
-        return jobPositionMapper.toDTO(jobPosition, lines);
+        List<JobPositionMapEntity> maps = jobPositionMapRepository.findByJobPositionId(jobPositionEntity.getId());
+        return jobPositionMapper.toDTO(jobPositionEntity, maps);
     }
 }

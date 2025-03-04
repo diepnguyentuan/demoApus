@@ -1,45 +1,44 @@
 package com.tiep.demoapus.entity;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "industry")
-@JsonInclude(JsonInclude.Include.ALWAYS)
+@Table(name = "group_reason")
 @Data
-public class Industry {
+@NoArgsConstructor
+@AllArgsConstructor
+public class GroupReasonEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String code;
     private String name;
+    private String description;
 
-    @Column(name = "is_active")
+    @Column(name = "is_Active")
     @JsonProperty("isActive")
     private Boolean active;
 
-    private String description;
-
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime created_at = LocalDateTime.now();
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
+    private LocalDateTime updated_at = LocalDateTime.now();
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        created_at = LocalDateTime.now();
+        updated_at = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updated_at = LocalDateTime.now();
     }
 }

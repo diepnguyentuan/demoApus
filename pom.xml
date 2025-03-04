@@ -23,7 +23,7 @@
     <scm>
         <connection/>
         <developerConnection/>
-        <tag/>
+        <tagEntity/>
         <url/>
     </scm>
     <properties>

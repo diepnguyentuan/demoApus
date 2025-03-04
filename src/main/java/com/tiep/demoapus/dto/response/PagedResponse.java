@@ -1,14 +1,14 @@
 package com.tiep.demoapus.dto.response;
 
-import com.tiep.demoapus.entity.PageMetaData;
+import com.tiep.demoapus.entity.PageMetaDataEntity;
 
 import java.util.List;
 
 public class PagedResponse<T> {
     private List<T> content;
-    private PageMetaData metadata;
+    private PageMetaDataEntity metadata;
 
-    public PagedResponse(List<T> content, PageMetaData metadata) {
+    public PagedResponse(List<T> content, PageMetaDataEntity metadata) {
         this.content = content;
         this.metadata = metadata;
     }
@@ -17,7 +17,7 @@ public class PagedResponse<T> {
         return content;
     }
 
-    public PageMetaData getMetadata() {
+    public PageMetaDataEntity getMetadata() {
         return metadata;
     }
 }

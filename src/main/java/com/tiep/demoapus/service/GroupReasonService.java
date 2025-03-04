@@ -1,14 +1,13 @@
 package com.tiep.demoapus.service;
 
-import com.tiep.demoapus.entity.GroupReason;
-
-import java.util.List;
+import com.tiep.demoapus.dto.response.GroupReasonResponseDTO;
+import com.tiep.demoapus.dto.request.GroupReasonRequestDTO;
+import org.springframework.data.domain.Page;
 
 public interface GroupReasonService {
-    List<GroupReason> getAllGroupReasons();
-    GroupReason getGroupReasonById(Long id);
-    GroupReason addGroupReason(GroupReason groupReason);
-    GroupReason updateGroupReason(GroupReason groupReason);
+    Page<GroupReasonResponseDTO> getAllGroupReasons(int page, int size, String sort, String search);
+    GroupReasonResponseDTO getGroupReasonById(Long id);
+    GroupReasonResponseDTO addGroupReason(GroupReasonRequestDTO dto);
+    GroupReasonResponseDTO updateGroupReason(Long id, GroupReasonRequestDTO dto);
     void deleteGroupReason(Long id);
-    boolean existsById(Long id);
 }

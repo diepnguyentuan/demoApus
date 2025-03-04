@@ -78,7 +78,6 @@ public class JobPositionResponseDTO {
         this.updatedAt = updatedAt;
     }
 
-    // Inner class để đại diện cho mỗi dòng trong mảng lines
     public static class Line {
         private DepartmentResponseDTO department;
         private PositionResponseDTO position;

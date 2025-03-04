@@ -1,9 +1,14 @@
 package com.tiep.demoapus.dto.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class JobPositionRequestDTO {
     private String code;
     private String name;
@@ -11,7 +16,4 @@ public class JobPositionRequestDTO {
     private boolean active;
     private Long industryId;
     private List<DepartmentPositionDTO> departmentPositions;
-
-    public JobPositionRequestDTO() {
-    }
 }

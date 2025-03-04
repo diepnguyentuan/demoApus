@@ -2,26 +2,20 @@ package com.tiep.demoapus.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "group_reason")
+@Table(name = "tag")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class GroupReason {
+public class TagEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String code;
     private String name;
-    private String description;
 
-    @Column(name = "is_Active")
+    @Column(name = "is_active")
     @JsonProperty("isActive")
     private Boolean active;
 

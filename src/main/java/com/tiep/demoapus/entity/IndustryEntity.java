@@ -1,5 +1,6 @@
 package com.tiep.demoapus.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -7,32 +8,38 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tag")
+@Table(name = "industry")
+@JsonInclude(JsonInclude.Include.ALWAYS)
 @Data
-public class Tag {
+public class IndustryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String code;
     private String name;
 
     @Column(name = "is_active")
     @JsonProperty("isActive")
     private Boolean active;
 
+    private String description;
+
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime created_at = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updated_at = LocalDateTime.now();
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
 
     @PrePersist
     protected void onCreate() {
-        created_at = LocalDateTime.now();
-        updated_at = LocalDateTime.now();
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updated_at = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 }

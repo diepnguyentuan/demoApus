@@ -1,78 +1,68 @@
 package com.tiep.demoapus.service.ServiceImp;
 
-import com.tiep.demoapus.entity.Industry;
+import com.tiep.demoapus.dto.request.IndustryRequestDTO;
+import com.tiep.demoapus.dto.response.IndustryResponseDTO;
+import com.tiep.demoapus.entity.IndustryEntity;
+import com.tiep.demoapus.mapper.IndustryMapper;
 import com.tiep.demoapus.repository.IndustryRepository;
 import com.tiep.demoapus.service.IIndustryService;
+import com.tiep.demoapus.specification.IndustrySpecification;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class IndustryServiceImpl implements IIndustryService {
 
-    @Autowired
-    IndustryRepository industryRepository;
+    private final IndustryRepository industryRepository;
+    private final IndustryMapper industryMapper;
 
     @Override
-    public List<Industry> getAllIndustries() {
-        return industryRepository.findAll();
-    }
-
-    @Override
-    public Industry getIndustryById(Long id) {
-        return industryRepository.findById(id).orElse(null);
-    }
-
-    @Override
-    public Industry addIndustry(Industry industry) {
-        LocalDateTime now = LocalDateTime.now();
-        if (industry.getCreatedAt() == null) {
-            industry.setCreatedAt(now);
-        }
-        industry.setUpdatedAt(now); // Luôn cập nhật thời gian cập nhật
-        return industryRepository.save(industry);
-    }
-
-    @Override
-    public Industry updateIndustry(Industry industry) {
-        industry.setUpdatedAt(LocalDateTime.now()); // Cập nhật thời gian trước khi lưu
-        return industryRepository.save(industry);
-    }
-
-    @Override
-    public Industry deleteIndustry(Long id) {
-        Industry industry = getIndustryById(id);
-        if (industry != null) {
-            industryRepository.delete(industry);
-        }
-        return industry;
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return industryRepository.findById(id).isPresent();
-    }
-
-    @Override
-    public boolean existsByCode(String code) {
-        return industryRepository.findByCode(code).isPresent();
-    }
-
-    @Override
-    public Page<Industry> getIndustries(int page, int size, String sort) {
-        String[] sortParams = sort.split(":");
-        String sortBy = sortParams[0];
-        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("DESC")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
+    public Page<IndustryResponseDTO> getIndustries(int page, int size, String sort, String search) {
+        Sort.Direction direction = sort.endsWith(":DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        String sortBy = sort.split(":")[0];
         PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        return industryRepository.findAll(pageable);
+        Page<IndustryEntity> pageData = industryRepository.findAll(IndustrySpecification.searchByCodeOrName(search), pageable);
+        return pageData.map(industryMapper::toDTO);
+    }
+
+    @Override
+    public IndustryResponseDTO getIndustryById(Long id) {
+        IndustryEntity industryEntity = industryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Industry not found"));
+        return industryMapper.toDTO(industryEntity);
+    }
+
+    @Override
+    public IndustryResponseDTO addIndustry(IndustryRequestDTO dto) {
+        if (industryRepository.findByCode(dto.getCode()).isPresent()) {
+            throw new RuntimeException("Industry code already exists");
+        }
+        IndustryEntity industryEntity = industryMapper.toEntity(dto);
+        industryEntity.setCreatedAt(LocalDateTime.now());
+        industryEntity.setUpdatedAt(LocalDateTime.now());
+        return industryMapper.toDTO(industryRepository.save(industryEntity));
+    }
+
+    @Override
+    public IndustryResponseDTO updateIndustry(Long id, IndustryRequestDTO dto) {
+        IndustryEntity industryEntity = industryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Industry not found"));
+        industryMapper.updateIndustryFromDTO(dto, industryEntity);
+        industryEntity.setUpdatedAt(LocalDateTime.now());
+        return industryMapper.toDTO(industryRepository.save(industryEntity));
+    }
+
+    @Override
+    public void deleteIndustry(Long id) {
+        if (!industryRepository.existsById(id)) {
+            throw new RuntimeException("Industry not found");
+        }
+        industryRepository.deleteById(id);
     }
 }
