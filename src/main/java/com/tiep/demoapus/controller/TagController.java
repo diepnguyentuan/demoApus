@@ -40,9 +40,9 @@ public class TagController {
         return ResponseEntity.ok(new ResponseWrapper(Map.of("id", dto.getId())));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateTag(@PathVariable Long id, @RequestBody TagRequestDTO tagRequestDTO) {
-        TagResponseDTO dto = tagService.updateTag(id, tagRequestDTO);
+    @PutMapping
+    public ResponseEntity<?> updateTag(@RequestBody TagRequestDTO tagRequestDTO) {
+        TagResponseDTO dto = tagService.updateTag(tagRequestDTO);
         return ResponseEntity.ok(new ResponseWrapper(Map.of("id", dto.getId())));
     }
 

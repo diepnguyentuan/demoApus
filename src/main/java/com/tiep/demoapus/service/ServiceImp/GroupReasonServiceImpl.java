@@ -41,7 +41,7 @@ public class GroupReasonServiceImpl implements GroupReasonService {
     public GroupReasonResponseDTO addGroupReason(GroupReasonRequestDTO dto) {
         GroupReasonEntity groupReasonEntity = groupReasonMapper.toEntity(dto);
         // Thời gian được cập nhật tự động qua @PrePersist của entity
-        GroupReasonEntity savedGroupReasonEntity = groupReasonRepository.save(groupReasonEntity);
+        GroupReasonEntity savedGroupReasonEntity = groupReasonRepository.saveAndFlush(groupReasonEntity);
         return groupReasonMapper.toDTO(savedGroupReasonEntity);
     }
 

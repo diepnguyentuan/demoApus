@@ -47,14 +47,16 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public TagResponseDTO updateTag(Long id, TagRequestDTO dto) {
-        TagEntity tagEntity = tagRepository.findById(id)
+    public TagResponseDTO updateTag(TagRequestDTO dto) {
+        TagEntity tagEntity = tagRepository.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Tag not found"));
+        // cập nhật các trường
         tagEntity.setName(dto.getName());
         tagEntity.setActive(dto.getIsActive());
         tagEntity.setUpdated_at(LocalDateTime.now());
         return tagMapper.toDTO(tagRepository.save(tagEntity));
     }
+
 
     @Override
     public void deleteTag(Long id) {
