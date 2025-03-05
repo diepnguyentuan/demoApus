@@ -1,5 +1,6 @@
 package com.tiep.demoapus.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ public class GroupReasonResponseDTO {
     private Long id;
     private String code;
     private String name;
-    private Boolean isActive;
+    @JsonProperty("isActive")
+    private Boolean active;
     private String description;
 }

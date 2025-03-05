@@ -1,7 +1,6 @@
 package com.tiep.demoapus.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,7 +19,6 @@ public class IndustryEntity {
     private String name;
 
     @Column(name = "is_active")
-    @JsonProperty("isActive")
     private Boolean active;
 
     private String description;

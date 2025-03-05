@@ -2,10 +2,10 @@ package com.tiep.demoapus.controller;
 
 import com.tiep.demoapus.dto.request.JobPositionRequestDTO;
 import com.tiep.demoapus.dto.response.JobPositionResponseDTO;
+import com.tiep.demoapus.dto.response.PageableResponse;
 import com.tiep.demoapus.dto.response.ResponseWrapper;
 import com.tiep.demoapus.service.JobPositionService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,34 +21,34 @@ public class JobPositionController {
     @PostMapping
     public ResponseEntity<?> addJobPosition(@RequestBody JobPositionRequestDTO requestDTO) {
         JobPositionResponseDTO responseDTO = jobPositionService.addJobPosition(requestDTO);
-        return ResponseEntity.ok(new ResponseWrapper(Map.of("id", responseDTO.getId())));
+        return ResponseEntity.ok(new ResponseWrapper((Map.of("id", responseDTO.getId()))));
     }
 
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<?> getAllJobPositions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "createdAt:DESC") String sort,
             @RequestParam(required = false) String search) {
-        Page<JobPositionResponseDTO> pageData = jobPositionService.getAllJobPositions(page, size, sort, search);
-        return ResponseEntity.ok(new ResponseWrapper(pageData));
+        PageableResponse<JobPositionResponseDTO> data = jobPositionService.getAllJobPositions(page, size, sort, search);
+        return ResponseEntity.ok(new ResponseWrapper(data));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateJobPosition(@PathVariable Long id, @RequestBody JobPositionRequestDTO requestDTO) {
-        JobPositionResponseDTO responseDTO = jobPositionService.updateJobPosition(id, requestDTO);
-        return ResponseEntity.ok(new ResponseWrapper(Map.of("id", responseDTO.getId())));
+    @PutMapping
+    public ResponseEntity<?> updateJobPosition(@RequestBody JobPositionRequestDTO requestDTO) {
+        JobPositionResponseDTO responseDTO = jobPositionService.updateJobPosition(requestDTO.getId(), requestDTO);
+        return ResponseEntity.ok(new ResponseWrapper((Map.of("id", responseDTO.getId()))));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteJobPosition(@PathVariable Long id) {
         jobPositionService.deleteJobPosition(id);
-        return ResponseEntity.ok(new ResponseWrapper(Map.of("message", "Deleted successfully")));
+        return ResponseEntity.ok(new ResponseWrapper("Deleted successfully"));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getJobPositionById(@PathVariable Long id) {
         JobPositionResponseDTO responseDTO = jobPositionService.getJobPositionById(id);
-        return ResponseEntity.ok(new ResponseWrapper(Map.of("data", responseDTO)));
+        return ResponseEntity.ok(new ResponseWrapper(responseDTO));
     }
 }

@@ -1,26 +1,22 @@
 package com.tiep.demoapus.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "job_position")
+@Table(name = "reason")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class JobPositionEntity {
+@NoArgsConstructor
+public class ReasonEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String code;
     private String name;
     private String description;
 
@@ -28,11 +24,8 @@ public class JobPositionEntity {
     private Boolean active;
 
     @ManyToOne
-    @JoinColumn(name = "industry_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_job_position_industry"))
-    private IndustryEntity industryEntity;
-
-    @OneToMany(mappedBy = "jobPosition", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<JobPositionMapEntity> jobPositionMapEntities = new ArrayList<>();
+    @JoinColumn(name = "group_reason_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_group_reason"))
+    private GroupReasonEntity groupReason;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

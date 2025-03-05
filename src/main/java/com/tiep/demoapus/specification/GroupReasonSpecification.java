@@ -5,7 +5,7 @@ import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 public class GroupReasonSpecification {
-    public static Specification<GroupReasonEntity> searchByCodeOrName(String search) {
+    public static Specification<GroupReasonEntity> searchByName(String search) {
         return (root, query, builder) -> {
             if (search == null || search.trim().isEmpty()) {
                 return builder.conjunction();

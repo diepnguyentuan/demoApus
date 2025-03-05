@@ -10,6 +10,4 @@ import org.mapstruct.MappingTarget;
 public interface IndustryMapper {
     IndustryResponseDTO toDTO(IndustryEntity industryEntity);
     IndustryEntity toEntity(IndustryRequestDTO dto);
-
-    void updateIndustryFromDTO(IndustryRequestDTO dto, @MappingTarget IndustryEntity industryEntity);
 }

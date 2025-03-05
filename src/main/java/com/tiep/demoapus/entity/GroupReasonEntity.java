@@ -21,8 +21,7 @@ public class GroupReasonEntity {
     private String name;
     private String description;
 
-    @Column(name = "is_Active")
-    @JsonProperty("isActive")
+    @Column(name = "is_active")
     private Boolean active;
 
     @Column(name = "created_at", nullable = false, updatable = false)

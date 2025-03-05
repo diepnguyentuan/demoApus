@@ -26,6 +26,4 @@ public class JobPositionMapEntity {
     @ManyToOne
     @JoinColumn(name = "job_position_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_job_position_map_job_position"))
     private JobPositionEntity jobPosition;
-
-
 }

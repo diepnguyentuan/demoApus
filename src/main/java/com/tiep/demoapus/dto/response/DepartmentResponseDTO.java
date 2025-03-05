@@ -1,34 +1,14 @@
 package com.tiep.demoapus.dto.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DepartmentResponseDTO {
     private Long id;
     private String name;
-
-    // Constructors
-    public DepartmentResponseDTO() {}
-
-    public DepartmentResponseDTO(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    // Getters and Setters
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }
 

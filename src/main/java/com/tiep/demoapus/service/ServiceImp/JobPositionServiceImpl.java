@@ -2,6 +2,7 @@ package com.tiep.demoapus.service.ServiceImp;
 
 import com.tiep.demoapus.dto.request.JobPositionRequestDTO;
 import com.tiep.demoapus.dto.response.JobPositionResponseDTO;
+import com.tiep.demoapus.dto.response.PageableResponse;
 import com.tiep.demoapus.entity.JobPositionEntity;
 import com.tiep.demoapus.entity.JobPositionMapEntity;
 import com.tiep.demoapus.mapper.JobPositionMapper;
@@ -40,7 +41,7 @@ public class JobPositionServiceImpl implements JobPositionService {
         jobPositionEntity.setCode(dto.getCode());
         jobPositionEntity.setName(dto.getName());
         jobPositionEntity.setDescription(dto.getDescription());
-        jobPositionEntity.setActive(dto.isActive());
+        jobPositionEntity.setActive(dto.getActive());
         jobPositionEntity.setIndustryEntity(industryEntity);
         jobPositionEntity.setCreatedAt(LocalDateTime.now());
         jobPositionEntity.setUpdatedAt(LocalDateTime.now());
@@ -52,7 +53,7 @@ public class JobPositionServiceImpl implements JobPositionService {
             dto.getDepartmentPositions().forEach(dp -> {
                 if (dp.getPositionIds() != null) {
                     dp.getPositionIds().forEach(positionId -> {
-                        JobPositionMapEntity mapEntity = new JobPositionMapEntity();
+                        var mapEntity = new JobPositionMapEntity();
                         mapEntity.setJobPosition(finalJobPositionEntity);
                         mapEntity.setDepartmentId(dp.getDepartmentId());
                         mapEntity.setPositionId(positionId);
@@ -67,15 +68,24 @@ public class JobPositionServiceImpl implements JobPositionService {
     }
 
     @Override
-    public Page<JobPositionResponseDTO> getAllJobPositions(int page, int size, String sort, String search) {
+    public PageableResponse<JobPositionResponseDTO> getAllJobPositions(int page, int size, String sort, String search) {
         Sort.Direction direction = sort.endsWith(":DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
         String sortBy = sort.split(":")[0];
         PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
         Page<JobPositionEntity> pageData = jobPositionRepository.findAll(JobPositionSpecification.searchByCodeOrName(search), pageable);
-        return pageData.map(jobPositionEntity -> {
+        Page<JobPositionResponseDTO> dtoPage = pageData.map(jobPositionEntity -> {
             List<JobPositionMapEntity> maps = jobPositionMapRepository.findByJobPositionId(jobPositionEntity.getId());
             return jobPositionMapper.toDTO(jobPositionEntity, maps);
         });
+        return PageableResponse.<JobPositionResponseDTO>builder()
+                .content(dtoPage.getContent())
+                .page(dtoPage.getNumber())
+                .size(dtoPage.getSize())
+                .sort(sort)
+                .totalElements(dtoPage.getTotalElements())
+                .totalPages(dtoPage.getTotalPages())
+                .numberOfElements(dtoPage.getNumberOfElements())
+                .build();
     }
 
     @Override
@@ -88,7 +98,7 @@ public class JobPositionServiceImpl implements JobPositionService {
         jobPositionEntity.setCode(dto.getCode());
         jobPositionEntity.setName(dto.getName());
         jobPositionEntity.setDescription(dto.getDescription());
-        jobPositionEntity.setActive(dto.isActive());
+        jobPositionEntity.setActive(dto.getActive());
         jobPositionEntity.setIndustryEntity(industryEntity);
         jobPositionEntity.setUpdatedAt(LocalDateTime.now());
         jobPositionEntity = jobPositionRepository.save(jobPositionEntity);
@@ -99,7 +109,7 @@ public class JobPositionServiceImpl implements JobPositionService {
             dto.getDepartmentPositions().forEach(dp -> {
                 if (dp.getPositionIds() != null) {
                     dp.getPositionIds().forEach(positionId -> {
-                        JobPositionMapEntity mapEntity = new JobPositionMapEntity();
+                        var mapEntity = new JobPositionMapEntity();
                         mapEntity.setJobPosition(finalJobPositionEntity);
                         mapEntity.setDepartmentId(dp.getDepartmentId());
                         mapEntity.setPositionId(positionId);
