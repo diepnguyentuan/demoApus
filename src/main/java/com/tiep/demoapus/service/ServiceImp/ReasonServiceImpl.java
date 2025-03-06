@@ -2,14 +2,19 @@ package com.tiep.demoapus.service.ServiceImp;
 
 import com.tiep.demoapus.dto.request.ReasonRequestDTO;
 import com.tiep.demoapus.dto.response.PageableResponse;
+import com.tiep.demoapus.dto.response.PageableResponseUtil;
 import com.tiep.demoapus.dto.response.ReasonResponseDTO;
 import com.tiep.demoapus.entity.ReasonEntity;
 import com.tiep.demoapus.mapper.ReasonMapper;
 import com.tiep.demoapus.repository.GroupReasonRepository;
 import com.tiep.demoapus.repository.ReasonRepository;
 import com.tiep.demoapus.service.ReasonService;
+import com.tiep.demoapus.specification.GenericSpecification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,13 +30,19 @@ public class ReasonServiceImpl implements ReasonService {
 
     @Override
     public PageableResponse<ReasonResponseDTO> getAllReasons(int page, int size, String sort, String search) {
-
-        return null;
+        Sort.Direction direction = sort.endsWith(":DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        String sortBy = sort.split(":")[0];
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Page<ReasonEntity> reasonEntities = reasonRepository.findAll(GenericSpecification.searchByName(search), pageable);
+        Page<ReasonResponseDTO> dtoPage = reasonEntities.map(reasonMapper::toDTO);
+        return PageableResponseUtil.fromPage(dtoPage, sort);
     }
 
     @Override
     public ReasonResponseDTO getReasonById(Long id) {
-        return null;
+        ReasonEntity reasonEntity = reasonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reason not found"));
+        return reasonMapper.toDTO(reasonEntity);
     }
 
     @Override
@@ -54,17 +65,23 @@ public class ReasonServiceImpl implements ReasonService {
     @Override
     @Transactional
     public ReasonResponseDTO updateReason(ReasonRequestDTO reason) {
+        var groupReasonEntity = groupReasonRepository.findById(reason.getGroupReasonId())
+                .orElseThrow(() -> new RuntimeException("Group Reason Not Found"));
+        //sử dụng mapper để chuyển từ dto sang entity
+        ReasonEntity reasonEntity = reasonMapper.toEntity(reason);
+        reasonEntity.setGroupReason(groupReasonEntity);
+        reasonEntity.setUpdatedAt(LocalDateTime.now());
 
-        return null;
+
+        return reasonMapper.toDTO(reasonRepository.save(reasonEntity));
     }
 
     @Override
     public void deleteReason(Long id) {
-
+        if (!reasonRepository.existsById(id)) {
+            throw new RuntimeException("Reason Not Found");
+        }
+        reasonRepository.deleteById(id);
     }
 
-    @Override
-    public boolean existsById(Long id) {
-        return false;
-    }
 }

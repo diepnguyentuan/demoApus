@@ -1,13 +1,15 @@
 package com.tiep.demoapus.service.ServiceImp;
 
 import com.tiep.demoapus.dto.request.TagRequestDTO;
+import com.tiep.demoapus.dto.response.PageableResponseUtil;
+import com.tiep.demoapus.dto.response.ReasonResponseDTO;
 import com.tiep.demoapus.dto.response.TagResponseDTO;
 import com.tiep.demoapus.dto.response.PageableResponse;
 import com.tiep.demoapus.entity.TagEntity;
 import com.tiep.demoapus.mapper.TagMapper;
 import com.tiep.demoapus.repository.TagRepository;
 import com.tiep.demoapus.service.TagService;
-import com.tiep.demoapus.specification.TagSpecification;
+import com.tiep.demoapus.specification.GenericSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,16 +30,9 @@ public class TagServiceImpl implements TagService {
         Sort.Direction direction = sort.endsWith(":DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
         String sortBy = sort.split(":")[0];
         PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        Page<TagEntity> pageData = tagRepository.findAll(TagSpecification.searchByName(search), pageable);
-        return PageableResponse.<TagResponseDTO>builder()
-                .content(pageData.map(tagMapper::toDTO).getContent())
-                .page(pageData.getNumber())
-                .size(pageData.getSize())
-                .sort(sort)
-                .totalElements(pageData.getTotalElements())
-                .totalPages(pageData.getTotalPages())
-                .numberOfElements(pageData.getNumberOfElements())
-                .build();
+        Page<TagEntity> tagEntities = tagRepository.findAll(GenericSpecification.searchByName(search), pageable);
+        Page<TagResponseDTO> dtoPage = tagEntities.map(tagMapper::toDTO);
+        return PageableResponseUtil.fromPage(dtoPage, sort);
     }
 
     @Override

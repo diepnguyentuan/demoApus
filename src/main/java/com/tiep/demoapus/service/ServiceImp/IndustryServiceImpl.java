@@ -3,11 +3,12 @@ package com.tiep.demoapus.service.ServiceImp;
 import com.tiep.demoapus.dto.request.IndustryRequestDTO;
 import com.tiep.demoapus.dto.response.IndustryResponseDTO;
 import com.tiep.demoapus.dto.response.PageableResponse;
+import com.tiep.demoapus.dto.response.PageableResponseUtil;
 import com.tiep.demoapus.entity.IndustryEntity;
 import com.tiep.demoapus.mapper.IndustryMapper;
 import com.tiep.demoapus.repository.IndustryRepository;
 import com.tiep.demoapus.service.IIndustryService;
-import com.tiep.demoapus.specification.IndustrySpecification;
+import com.tiep.demoapus.specification.GenericSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,18 +29,10 @@ public class IndustryServiceImpl implements IIndustryService {
         Sort.Direction direction = sort.endsWith(":DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
         String sortBy = sort.split(":")[0];
         PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        Page<IndustryEntity> pageData = industryRepository.findAll(IndustrySpecification.searchByCodeOrName(search), pageable);
+        Page<IndustryEntity> pageData = industryRepository.findAll(GenericSpecification.searchByCodeOrName(search), pageable);
         Page<IndustryResponseDTO> dtoPage = pageData.map(industryMapper::toDTO);
 
-        return PageableResponse.<IndustryResponseDTO>builder()
-                .content(dtoPage.getContent())
-                .page(dtoPage.getNumber())
-                .size(dtoPage.getSize())
-                .sort(sort)  // Nếu cần format lại, xử lý tại đây
-                .totalElements(dtoPage.getTotalElements())
-                .totalPages(dtoPage.getTotalPages())
-                .numberOfElements(dtoPage.getNumberOfElements())
-                .build();
+        return PageableResponseUtil.fromPage(dtoPage, sort);
     }
 
     @Override

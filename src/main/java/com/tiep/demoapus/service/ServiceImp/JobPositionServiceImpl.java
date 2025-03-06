@@ -3,6 +3,7 @@ package com.tiep.demoapus.service.ServiceImp;
 import com.tiep.demoapus.dto.request.JobPositionRequestDTO;
 import com.tiep.demoapus.dto.response.JobPositionResponseDTO;
 import com.tiep.demoapus.dto.response.PageableResponse;
+import com.tiep.demoapus.dto.response.PageableResponseUtil;
 import com.tiep.demoapus.entity.JobPositionEntity;
 import com.tiep.demoapus.entity.JobPositionMapEntity;
 import com.tiep.demoapus.mapper.JobPositionMapper;
@@ -10,7 +11,7 @@ import com.tiep.demoapus.repository.IndustryRepository;
 import com.tiep.demoapus.repository.JobPositionMapRepository;
 import com.tiep.demoapus.repository.JobPositionRepository;
 import com.tiep.demoapus.service.JobPositionService;
-import com.tiep.demoapus.specification.JobPositionSpecification;
+import com.tiep.demoapus.specification.GenericSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -72,20 +73,12 @@ public class JobPositionServiceImpl implements JobPositionService {
         Sort.Direction direction = sort.endsWith(":DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
         String sortBy = sort.split(":")[0];
         PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        Page<JobPositionEntity> pageData = jobPositionRepository.findAll(JobPositionSpecification.searchByCodeOrName(search), pageable);
+        Page<JobPositionEntity> pageData = jobPositionRepository.findAll(GenericSpecification.searchByCodeOrName(search), pageable);
         Page<JobPositionResponseDTO> dtoPage = pageData.map(jobPositionEntity -> {
             List<JobPositionMapEntity> maps = jobPositionMapRepository.findByJobPositionId(jobPositionEntity.getId());
             return jobPositionMapper.toDTO(jobPositionEntity, maps);
         });
-        return PageableResponse.<JobPositionResponseDTO>builder()
-                .content(dtoPage.getContent())
-                .page(dtoPage.getNumber())
-                .size(dtoPage.getSize())
-                .sort(sort)
-                .totalElements(dtoPage.getTotalElements())
-                .totalPages(dtoPage.getTotalPages())
-                .numberOfElements(dtoPage.getNumberOfElements())
-                .build();
+        return PageableResponseUtil.fromPage(dtoPage, sort);
     }
 
     @Override

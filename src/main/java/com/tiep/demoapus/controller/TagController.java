@@ -48,10 +48,7 @@ public class TagController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTag(@PathVariable Long id) {
-        if (!tagService.existsById(id)) {
-            return ResponseEntity.badRequest().body(new ResponseWrapper("Tag not found"));
-        }
         tagService.deleteTag(id);
-        return ResponseEntity.ok(new ResponseWrapper("Tag deleted successfully"));
+        return ResponseEntity.ok("Deleted Tag");
     }
 }

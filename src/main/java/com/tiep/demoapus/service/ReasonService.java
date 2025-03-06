@@ -10,5 +10,4 @@ public interface ReasonService {
     ReasonResponseDTO addReason(ReasonRequestDTO reason);
     ReasonResponseDTO updateReason(ReasonRequestDTO reason);
     void deleteReason(Long id);
-    boolean existsById(Long id);
 }
