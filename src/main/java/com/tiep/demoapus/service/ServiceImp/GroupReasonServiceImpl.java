@@ -15,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class GroupReasonServiceImpl implements GroupReasonService {
@@ -43,7 +45,8 @@ public class GroupReasonServiceImpl implements GroupReasonService {
     @Override
     public GroupReasonResponseDTO addGroupReason(GroupReasonRequestDTO dto) {
         GroupReasonEntity entity = groupReasonMapper.toEntity(dto);
-        // Nếu cần thiết, set thêm thông tin thời gian, v.v.
+        entity.setCreated_at(LocalDateTime.now());
+        entity.setUpdated_at(LocalDateTime.now());
         GroupReasonEntity saved = groupReasonRepository.save(entity);
         return groupReasonMapper.toDTO(saved);
     }

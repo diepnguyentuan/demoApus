@@ -8,25 +8,21 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "reason")
+@Table(name = "candidate_requirement")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReasonEntity {
+public class CandidateReqEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-    private String code;
-    private String description;
 
     @Column(name = "is_active")
     private Boolean active;
 
-    @ManyToOne
-    @JoinColumn(name = "group_reason_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_group_reason"))
-    private GroupReasonEntity groupReason;
+    @Column(name = "department_id", nullable = false)
+    private Long dapartmentId;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

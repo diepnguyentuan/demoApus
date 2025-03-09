@@ -6,27 +6,27 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "reason")
+@Table(name = "benefit_map")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReasonEntity {
+public class BenefitEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
     private String code;
-    private String description;
-
+    private String name;
+    private String content;
     @Column(name = "is_active")
     private Boolean active;
 
-    @ManyToOne
-    @JoinColumn(name = "group_reason_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_group_reason"))
-    private GroupReasonEntity groupReason;
+    @OneToMany(mappedBy = "benefit")
+    private List<BenefitMapEntity> maps = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

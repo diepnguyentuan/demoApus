@@ -5,6 +5,7 @@ import com.tiep.demoapus.dto.response.HiringTypeResponseDTO;
 import com.tiep.demoapus.dto.response.PageableResponse;
 import com.tiep.demoapus.dto.response.ResponseWrapper;
 import com.tiep.demoapus.service.HiringTypeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +37,13 @@ public class HiringTypeController {
         return ResponseEntity.ok(data);
     }
     @PostMapping
-    public ResponseEntity<?> addHiringType(@RequestBody HiringTypeRequestDTO hiringTypeRequestDTO) {
+    public ResponseEntity<?> addHiringType(@Valid @RequestBody HiringTypeRequestDTO hiringTypeRequestDTO) {
         HiringTypeResponseDTO data = hiringTypeService.addHiringType(hiringTypeRequestDTO);
         return ResponseEntity.ok(new ResponseWrapper(Map.of("id", data.getId())));
     }
 
     @PutMapping
-    public ResponseEntity<?> updateHiringType(@RequestBody HiringTypeRequestDTO hiringTypeRequestDTO) {
+    public ResponseEntity<?> updateHiringType(@Valid @RequestBody HiringTypeRequestDTO hiringTypeRequestDTO) {
         HiringTypeResponseDTO data = hiringTypeService.updateHiringType(hiringTypeRequestDTO);
         return ResponseEntity.ok(new ResponseWrapper(data));
     }

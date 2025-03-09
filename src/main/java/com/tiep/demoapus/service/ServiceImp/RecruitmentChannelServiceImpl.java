@@ -38,8 +38,10 @@ public class RecruitmentChannelServiceImpl implements RecruitmentChannelService 
     }
 
     @Override
-    public RecruitmentChannelResponseDTO getRecruitmentChannel(int id) {
-        return null;
+    public RecruitmentChannelResponseDTO getRecruitmentChannel(Long id) {
+        RecruitmentChannelEntity recruitmentChannelEntity = recruitmentChannelRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("RecruitmentChannel not found"));
+        return recruitmentChannelMapper.toDTO(recruitmentChannelEntity);
     }
 
     @Override
