@@ -44,8 +44,8 @@ public class CandidateReqServiceImpl implements CandidateReqService {
     @Override
     public CandidateReqResponseDTO addCandidateReq(CandidateReqRequestDTO dto) {
         CandidateReqEntity candidateReqEntity = candidateReqMapper.toEntity(dto);
-        candidateReqEntity.setCreated_at(LocalDateTime.now());
-        candidateReqEntity.setUpdated_at(LocalDateTime.now());
+        candidateReqEntity.setCreatedAt(LocalDateTime.now());
+        candidateReqEntity.setUpdatedAt(LocalDateTime.now());
         candidateReqEntity = candidateReqRepository.save(candidateReqEntity);
         return new CandidateReqResponseDTO(candidateReqEntity.getId());
     }
@@ -53,7 +53,7 @@ public class CandidateReqServiceImpl implements CandidateReqService {
     @Override
     public CandidateReqResponseDTO updateCandidateReq(CandidateReqRequestDTO dto) {
         CandidateReqEntity candidateReqEntity = candidateReqMapper.toEntity(dto);
-        candidateReqEntity.setUpdated_at(LocalDateTime.now());
+        candidateReqEntity.setUpdatedAt(LocalDateTime.now());
         candidateReqEntity = candidateReqRepository.save(candidateReqEntity);
         return new CandidateReqResponseDTO(candidateReqEntity.getId());
     }

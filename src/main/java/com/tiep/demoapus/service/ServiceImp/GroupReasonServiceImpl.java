@@ -45,8 +45,8 @@ public class GroupReasonServiceImpl implements GroupReasonService {
     @Override
     public GroupReasonResponseDTO addGroupReason(GroupReasonRequestDTO dto) {
         GroupReasonEntity entity = groupReasonMapper.toEntity(dto);
-        entity.setCreated_at(LocalDateTime.now());
-        entity.setUpdated_at(LocalDateTime.now());
+        entity.setCreatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now());
         GroupReasonEntity saved = groupReasonRepository.save(entity);
         return groupReasonMapper.toDTO(saved);
     }

@@ -61,7 +61,7 @@ public interface JobPositionMapper {
                 }
             }
 
-            DepartmentResponseDTO deptDTO = new DepartmentResponseDTO(departmentId, null);
+            DepartmentResponseDTO deptDTO = new DepartmentResponseDTO(departmentId);
             JobPositionResponseDTO.Line line = new JobPositionResponseDTO.Line(deptDTO, positions);
             lines.add(line);
         }

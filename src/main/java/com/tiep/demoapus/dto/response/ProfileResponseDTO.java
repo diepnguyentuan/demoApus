@@ -5,21 +5,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BenefitResponseDTO {
+public class ProfileResponseDTO {
+
     private Long id;
     private String code;
     private String name;
-    private String content;
     @JsonProperty("isActive")
     private Boolean active;
-    private List<DepartmentResponseDTO> departments;
+    private String description;
 
-    public BenefitResponseDTO(Long id) {
+    public ProfileResponseDTO(Long id) {
         this.id = id;
     }
 }

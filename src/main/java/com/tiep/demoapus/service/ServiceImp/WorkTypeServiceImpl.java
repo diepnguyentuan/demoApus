@@ -43,8 +43,8 @@ public class WorkTypeServiceImpl implements WorkTypeService {
     @Override
     public WorkTypeResponseDTO addWorkType(WorkTypeRequestDTO workTypeRequestDTO) {
         WorkTypeEntity workTypeEntity = workTypeMapper.toEntity(workTypeRequestDTO);
-        workTypeEntity.setCreated_at(LocalDateTime.now());
-        workTypeEntity.setUpdated_at(LocalDateTime.now());
+        workTypeEntity.setCreatedAt(LocalDateTime.now());
+        workTypeEntity.setUpdatedAt(LocalDateTime.now());
         workTypeEntity = workTypeRepository.save(workTypeEntity);
         return new WorkTypeResponseDTO(workTypeEntity.getId());
     }
@@ -52,7 +52,7 @@ public class WorkTypeServiceImpl implements WorkTypeService {
     @Override
     public WorkTypeResponseDTO updateWorkType(WorkTypeRequestDTO workTypeRequestDTO) {
         WorkTypeEntity workTypeEntity = workTypeMapper.toEntity(workTypeRequestDTO);
-        workTypeEntity.setUpdated_at(LocalDateTime.now());
+        workTypeEntity.setUpdatedAt(LocalDateTime.now());
         workTypeEntity = workTypeRepository.save(workTypeEntity);
         return new WorkTypeResponseDTO(workTypeEntity.getId());
     }

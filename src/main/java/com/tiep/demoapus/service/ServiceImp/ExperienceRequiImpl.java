@@ -45,8 +45,8 @@ public class ExperienceRequiImpl implements ExperienceRequirementService {
     @Override
     public ExperienceRequirementResponseDTO addExperienceRequirementResponseDto(ExperienceRequirementRequestDTO dto) {
         ExperienceRequirementEntity experienceRequirementEntity = experienceRequirementMapper.toEntity(dto);
-        experienceRequirementEntity.setCreated_at(LocalDateTime.now());
-        experienceRequirementEntity.setUpdated_at(LocalDateTime.now());
+        experienceRequirementEntity.setCreatedAt(LocalDateTime.now());
+        experienceRequirementEntity.setUpdatedAt(LocalDateTime.now());
         experienceRequirementRepository.save(experienceRequirementEntity);
         return new ExperienceRequirementResponseDTO(experienceRequirementEntity.getId());
     }
@@ -54,7 +54,7 @@ public class ExperienceRequiImpl implements ExperienceRequirementService {
     @Override
     public ExperienceRequirementResponseDTO updateExperienceRequirementResponseDto(ExperienceRequirementRequestDTO dto) {
         ExperienceRequirementEntity experienceRequirementEntity = experienceRequirementMapper.toEntity(dto);
-        experienceRequirementEntity.setUpdated_at(LocalDateTime.now());
+        experienceRequirementEntity.setUpdatedAt(LocalDateTime.now());
         experienceRequirementRepository.save(experienceRequirementEntity);
         return new ExperienceRequirementResponseDTO(experienceRequirementEntity.getId());
     }

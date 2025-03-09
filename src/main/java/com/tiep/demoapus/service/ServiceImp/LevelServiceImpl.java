@@ -44,8 +44,8 @@ public class LevelServiceImpl implements LevelService {
     @Override
     public LevelResponseDTO addLevel(LevelRequestDTO requestDTO) {
         LevelEntity levelEntity = levelMapper.toEntity(requestDTO);
-        levelEntity.setCreated_at(LocalDateTime.now());
-        levelEntity.setUpdated_at(LocalDateTime.now());
+        levelEntity.setCreatedAt(LocalDateTime.now());
+        levelEntity.setUpdatedAt(LocalDateTime.now());
         levelEntity = levelRepository.save(levelEntity);
         return new LevelResponseDTO(levelEntity.getId());
     }
@@ -53,7 +53,7 @@ public class LevelServiceImpl implements LevelService {
     @Override
     public LevelResponseDTO updateLevel(LevelRequestDTO requestDTO) {
         LevelEntity levelEntity = levelMapper.toEntity(requestDTO);
-        levelEntity.setUpdated_at(LocalDateTime.now());
+        levelEntity.setUpdatedAt(LocalDateTime.now());
         levelEntity = levelRepository.save(levelEntity);
         return new LevelResponseDTO(levelEntity.getId());
     }

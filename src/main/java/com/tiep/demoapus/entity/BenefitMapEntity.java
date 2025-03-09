@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "benefit")
+@Table(name = "benefit_map")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

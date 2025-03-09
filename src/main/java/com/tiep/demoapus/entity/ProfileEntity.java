@@ -6,28 +6,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "benefit")
+@Table(name = "profile")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BenefitEntity {
+public class ProfileEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String code;
     private String name;
-    private String content;
+    private String description;
+
     @Column(name = "is_active")
     private Boolean active;
-
-    @OneToMany(mappedBy = "benefit", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<BenefitMapEntity> maps = new ArrayList<>();
-
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

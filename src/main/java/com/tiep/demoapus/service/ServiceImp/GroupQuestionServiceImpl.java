@@ -42,8 +42,8 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
     @Override
     public GroupQuestionResponseDTO createGroupQuestion(GroupQuestionRequestDTO groupQuestionRequestDTO) {
         GroupQuestionEntity groupQuestionEntity = groupQuestionMapper.toEntity(groupQuestionRequestDTO);
-        groupQuestionEntity.setCreated_at(LocalDateTime.now());
-        groupQuestionEntity.setUpdated_at(LocalDateTime.now());
+        groupQuestionEntity.setCreatedAt(LocalDateTime.now());
+        groupQuestionEntity.setUpdatedAt(LocalDateTime.now());
         groupQuestionEntity = groupQuestionRepository.save(groupQuestionEntity);
         return new GroupQuestionResponseDTO(groupQuestionEntity.getId());
     }
@@ -51,7 +51,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
     @Override
     public GroupQuestionResponseDTO updateGroupQuestion(GroupQuestionRequestDTO groupQuestionRequestDTO) {
         GroupQuestionEntity groupQuestionEntity = groupQuestionMapper.toEntity(groupQuestionRequestDTO);
-        groupQuestionEntity.setUpdated_at(LocalDateTime.now());
+        groupQuestionEntity.setUpdatedAt(LocalDateTime.now());
         groupQuestionEntity = groupQuestionRepository.save(groupQuestionEntity);
         return new GroupQuestionResponseDTO(groupQuestionEntity.getId());
     }

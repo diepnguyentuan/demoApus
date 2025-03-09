@@ -29,7 +29,7 @@ public class GroupQuestionController {
         return ResponseEntity.ok(new ResponseWrapper(data));
     }
 
-    @GetMapping("/{id]")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getGroupQuestionById(@PathVariable Long id) {
         GroupQuestionResponseDTO response = groupQuestionService.getGroupQuestionById(id);
         return ResponseEntity.ok(new ResponseWrapper(response));
