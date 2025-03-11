@@ -1,13 +1,14 @@
 package com.tiep.demoapus.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class DepartmentResponseDTO {
     private Long id;
+    private String name;
 }
 

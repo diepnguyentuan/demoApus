@@ -61,35 +61,19 @@ public class BenefitServiceImpl implements BenefitService {
 
     @Override
     public BenefitResponseDTO updateBenefit(BenefitRequestDTO benefitRequestDTO) {
-        // Kiểm tra id có tồn tại trong DTO hay không
-        if (benefitRequestDTO.getId() == null) {
-            throw new RuntimeException("ID is required for update");
+        // Map từ DTO sang Entity, trong đó 'lines' được chuyển thành danh sách BenefitMapEntity
+        BenefitEntity benefitEntity = benefitMapper.toEntity(benefitRequestDTO);
+
+        // Đảm bảo mỗi BenefitMapEntity có tham chiếu đến BenefitEntity
+        if (benefitEntity.getMaps() != null) {
+            benefitEntity.getMaps().forEach(map -> map.setBenefit(benefitEntity));
         }
 
-        // Lấy BenefitEntity hiện có từ database dựa trên id trong DTO
-        BenefitEntity existingBenefit = benefitRepository.findById(benefitRequestDTO.getId())
-                .orElseThrow(() -> new RuntimeException("Benefit not found"));
+        // Lưu BenefitEntity, nếu cascade được thiết lập thì các BenefitMapEntity cũng được lưu tự động
+        BenefitEntity savedEntity = benefitRepository.save(benefitEntity);
 
-        // Cập nhật các trường cơ bản
-        existingBenefit.setCode(benefitRequestDTO.getCode());
-        existingBenefit.setName(benefitRequestDTO.getName());
-        existingBenefit.setContent(benefitRequestDTO.getContent());
-        existingBenefit.setActive(benefitRequestDTO.getActive());
-
-        // Chuyển đổi danh sách department từ DTO (trường "lines") thành danh sách BenefitMapEntity mới
-        List<BenefitMapEntity> newMaps = benefitMapper.convertDepartmentDTOListToBenefitMapEntityList(benefitRequestDTO.getDepartmentId());
-        if (newMaps != null) {
-            newMaps.forEach(map -> map.setBenefit(existingBenefit));
-        }
-
-        // Cập nhật lại danh sách maps: xóa hết các bản ghi cũ và thêm danh sách mới
-        existingBenefit.getMaps().clear();
-        if (newMaps != null && !newMaps.isEmpty()) {
-            existingBenefit.getMaps().addAll(newMaps);
-        }
-
-        BenefitEntity updatedEntity = benefitRepository.save(existingBenefit);
-        return new BenefitResponseDTO(updatedEntity.getId());
+        // Mapper sẽ chuyển danh sách maps thành danh sách departments khi trả về
+        return new BenefitResponseDTO(savedEntity.getId());
     }
 
 

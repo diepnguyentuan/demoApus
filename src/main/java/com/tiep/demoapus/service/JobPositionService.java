@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 public interface JobPositionService {
     JobPositionResponseDTO addJobPosition(JobPositionRequestDTO dto);
     PageableResponse<JobPositionResponseDTO> getAllJobPositions(int page, int size, String sort, String search);
-    JobPositionResponseDTO updateJobPosition(Long id, JobPositionRequestDTO dto);
+    JobPositionResponseDTO updateJobPosition(JobPositionRequestDTO dto);
     void deleteJobPosition(Long id);
     JobPositionResponseDTO getJobPositionById(Long id);
 }

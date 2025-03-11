@@ -46,14 +46,7 @@ public class ReasonHiringServiceImpl implements ReasonHiringService {
 
     @Override
     public ReasonHiringResponseDTO updateReasonHiring(ReasonHiringRequestDTO dto) {
-        if (dto.getId() == null) {
-            throw new RuntimeException("Reason id is null");
-        }
-        ReasonEntity reasonEntity = reasonRepository.findById(dto.getId()).orElse(null);
-        reasonEntity.setCode(dto.getCode());
-        reasonEntity.setName(dto.getName());
-        reasonEntity.setDescription(dto.getDescription());
-        reasonEntity.setActive(dto.getActive());
+        ReasonEntity reasonEntity = reasonHiringMapper.toEntity(dto);
         reasonEntity = reasonRepository.save(reasonEntity);
         return new ReasonHiringResponseDTO(reasonEntity.getId());
     }

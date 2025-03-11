@@ -33,7 +33,13 @@ public class ProfileController {
         return ResponseEntity.ok(new ResponseWrapper(data));
     }
 
-    @PostMapping
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getProfileById(@PathVariable Long id) {
+        ProfileResponseDTO data = profileService.getProfileById(id);
+        return ResponseEntity.ok(new ResponseWrapper(data));
+    }
+
+    @PutMapping
     public ResponseEntity<?> updateProfile(@RequestBody ProfileRequestDTO profileRequestDTO) {
         ProfileResponseDTO updateProfile = profileService.updateProfile(profileRequestDTO);
         return ResponseEntity.ok(new ResponseWrapper(updateProfile.getId()));

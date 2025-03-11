@@ -45,8 +45,6 @@ public class ExperienceRequiImpl implements ExperienceRequirementService {
     @Override
     public ExperienceRequirementResponseDTO addExperienceRequirementResponseDto(ExperienceRequirementRequestDTO dto) {
         ExperienceRequirementEntity experienceRequirementEntity = experienceRequirementMapper.toEntity(dto);
-        experienceRequirementEntity.setCreatedAt(LocalDateTime.now());
-        experienceRequirementEntity.setUpdatedAt(LocalDateTime.now());
         experienceRequirementRepository.save(experienceRequirementEntity);
         return new ExperienceRequirementResponseDTO(experienceRequirementEntity.getId());
     }

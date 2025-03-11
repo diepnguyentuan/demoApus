@@ -49,15 +49,8 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public ProfileResponseDTO updateProfile(ProfileRequestDTO dto) {
-        if (dto.getId() == null) {
-            throw new RuntimeException("Id not found");
-        }
-        ProfileEntity profile = profileRepository.findById(dto.getId()).orElse(null);
-        profile.setName(dto.getName());
-        profile.setDescription(dto.getDescription());
-        profile.setCode(dto.getCode());
-        profile.setActive(dto.getActive());
-        profile.setUpdatedAt(LocalDateTime.now());
+        ProfileEntity profile = profileMapper.toEntity(dto);
+
         profile = profileRepository.save(profile);
         return new ProfileResponseDTO(profile.getId());
     }

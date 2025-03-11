@@ -35,6 +35,12 @@ public class RecruitmentChannelController {
         return ResponseEntity.ok(new ResponseWrapper(data));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getRecruitmentChannelById(@PathVariable("id") Long id) {
+        RecruitmentChannelResponseDTO data = recruitmentChannelService.getRecruitmentChannel(id);
+        return ResponseEntity.ok(new ResponseWrapper(data));
+    }
+
     @PutMapping
     public ResponseEntity<?> updateRecruitmentChannel(@RequestBody RecruitmentChannelRequestDTO requestDTO) {
         RecruitmentChannelResponseDTO responseDTO = recruitmentChannelService.updateRecruitmentChannel(requestDTO);

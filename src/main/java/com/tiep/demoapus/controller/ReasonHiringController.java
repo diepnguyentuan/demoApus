@@ -27,9 +27,30 @@ public class ReasonHiringController {
         PageableResponse<ReasonHiringResponseDTO> data = reasonHiringService.getAllReasonHirings(page, size, sort, search);
         return ResponseEntity.ok(new ResponseWrapper(data));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getReasonHiringById(@PathVariable("id") Long id) {
+        ReasonHiringResponseDTO response = reasonHiringService.getReasonHiringById(id);
+        return ResponseEntity.ok(new ResponseWrapper(response));
+    }
+
     @PostMapping
     public ResponseEntity<?> addReasonHiring(@RequestBody ReasonHiringRequestDTO reasonHiringRequestDTO) {
         ReasonHiringResponseDTO data = reasonHiringService.addReasonHiring(reasonHiringRequestDTO);
         return ResponseEntity.ok(new ResponseWrapper(Map.of("id", data.getId())));
     }
+
+    @PutMapping
+    public ResponseEntity<?> updateReasonHiring(@RequestBody ReasonHiringRequestDTO reasonHiringRequestDTO) {
+        ReasonHiringResponseDTO data = reasonHiringService.updateReasonHiring(reasonHiringRequestDTO);
+        return ResponseEntity.ok(new ResponseWrapper(Map.of("id", data.getId())));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteReasonHiringById(@PathVariable("id") Long id) {
+        reasonHiringService.deleteReasonHiringById(id);
+        return ResponseEntity.ok("Deleted ReasonHiring");
+    }
+
+
 }

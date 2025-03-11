@@ -42,8 +42,6 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
     @Override
     public EmailTemplateResponseDTO createEmailTemplate(EmailTemplateRequestDTO emailTemplateRequestDTO) {
         EmailTemplateEntity entity = emailTemplateMapper.toEntity(emailTemplateRequestDTO);
-        entity.setCreatedAt(LocalDateTime.now());
-        entity.setUpdatedAt(LocalDateTime.now());
         entity = emailTemplateRepository.save(entity);
         return new EmailTemplateResponseDTO(entity.getId());
     }
