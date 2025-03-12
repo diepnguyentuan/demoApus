@@ -17,8 +17,9 @@ public interface JobPositionMapMapper {
     @Mapping(target = "position", expression = "java(new com.tiep.demoapus.dto.response.PositionResponseDTO(entity.getPositionId(), null))")
     JobPositionMapResponseDTO toDto(JobPositionMapEntity entity);
 
+
     // Phương thức mapping nông: chỉ map các trường cơ bản của JobPositionEntity,
-    // bỏ qua việc ánh xạ danh sách jobPositionMaps để phá vỡ vòng lặp.
+    // bỏ qua ánh xạ jobPositionMaps để phá vỡ vòng lặp.
     default JobPositionResponseDTO shallowJobPosition(JobPositionEntity entity) {
         if (entity == null) {
             return null;

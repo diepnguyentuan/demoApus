@@ -6,12 +6,12 @@ import com.tiep.demoapus.entity.JobPositionEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-
 @Mapper(componentModel = "spring", uses = {IndustryJobMapper.class})
 public interface JobPositionMapper {
 
     @Mapping(target = "industry", source = "industryEntity")
-    @Mapping(target = "jobPositionMaps", source = "jobPositionMapEntities")
+    @Mapping(target = "jobPositionMaps", ignore = true)
     JobPositionResponseDTO toDto(JobPositionEntity entity);
+
     JobPositionEntity toEntity(JobPositionRequestDTO dto);
 }
