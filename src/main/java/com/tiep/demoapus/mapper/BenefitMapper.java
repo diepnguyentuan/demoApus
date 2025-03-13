@@ -10,45 +10,46 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface BenefitMapper {
 
-    // Map từ DTO yêu cầu (BenefitRequestDTO) sang thực thể (BenefitEntity)
-    // Trường 'lines' trong DTO sẽ được chuyển thành danh sách BenefitMapEntity cho thuộc tính 'maps'
-    @Mapping(target = "maps", source = "departmentId", qualifiedByName = "convertDepartmentDTOListToBenefitMapEntityList")
-    BenefitEntity toEntity(BenefitRequestDTO dto);
-
-    // Map từ thực thể (BenefitEntity) sang DTO phản hồi (BenefitResponseDTO)
-    // Trường 'maps' trong entity sẽ được chuyển thành danh sách departments trong DTO
-    @Mapping(target = "departments", source = "maps", qualifiedByName = "convertBenefitMapEntityListToDepartmentResponseDTOList")
+    // Map từ BenefitEntity sang BenefitResponseDTO
+    // Trường "lines" được tạo từ danh sách "maps" (chỉ có departmentId được set)
+    @Mapping(target = "lines", source = "maps", qualifiedByName = "mapBenefitMapEntitiesToDepartmentResponseDTOList")
     BenefitResponseDTO toDto(BenefitEntity entity);
 
-    // Chuyển đổi danh sách các DepartmentDTO (trong trường lines của DTO) thành danh sách BenefitMapEntity
-    @Named("convertDepartmentDTOListToBenefitMapEntityList")
-    default List<BenefitMapEntity> convertDepartmentDTOListToBenefitMapEntityList(List<com.tiep.demoapus.dto.request.DepartmentDTO> lines) {
-        if (lines == null) {
-            return null;
+    // Map từ BenefitRequestDTO sang BenefitEntity (chuyển danh sách departmentIds thành maps)
+    @Mapping(target = "maps", source = "departmentIds", qualifiedByName = "convertDepartmentIdsToBenefitMapEntities")
+    BenefitEntity toEntity(BenefitRequestDTO dto);
+
+    @Named("mapBenefitMapEntitiesToDepartmentResponseDTOList")
+    default List<DepartmentResponseDTO> mapBenefitMapEntitiesToDepartmentResponseDTOList(List<BenefitMapEntity> maps) {
+        if (maps == null || maps.isEmpty()) {
+            return List.of();
         }
-        return lines.stream().map(departmentDTO -> {
-            BenefitMapEntity mapEntity = new BenefitMapEntity();
-            // Gán departmentId từ thuộc tính id của DepartmentDTO
-            mapEntity.setDepartmentId(departmentDTO.getId());
-            return mapEntity;
-        }).toList();
+        return maps.stream()
+                .map(mapEntity -> {
+                    DepartmentResponseDTO deptDto = new DepartmentResponseDTO();
+                    // Set departmentId từ mapping; tên không được cập nhật (sẽ là null)
+                    deptDto.setId(mapEntity.getDepartmentId());
+                    return deptDto;
+                })
+                .collect(Collectors.toList());
     }
 
-    // Chuyển đổi danh sách BenefitMapEntity thành danh sách DepartmentResponseDTO
-    // Ở đây, chỉ map thuộc tính id từ departmentId, các thuộc tính khác có thể bỏ qua
-    @Named("convertBenefitMapEntityListToDepartmentResponseDTOList")
-    default List<DepartmentResponseDTO> convertBenefitMapEntityListToDepartmentResponseDTOList(List<BenefitMapEntity> maps) {
-        if (maps == null) {
-            return null;
+    @Named("convertDepartmentIdsToBenefitMapEntities")
+    default List<BenefitMapEntity> convertDepartmentIdsToBenefitMapEntities(List<Long> departmentIds) {
+        if (departmentIds == null || departmentIds.isEmpty()) {
+            return List.of();
         }
-        return maps.stream().map(mapEntity -> {
-            DepartmentResponseDTO dto = new DepartmentResponseDTO();
-            dto.setId(mapEntity.getDepartmentId());
-            return dto;
-        }).toList();
+        return departmentIds.stream()
+                .map(id -> {
+                    BenefitMapEntity mapEntity = new BenefitMapEntity();
+                    mapEntity.setDepartmentId(id);
+                    return mapEntity;
+                })
+                .collect(Collectors.toList());
     }
 }

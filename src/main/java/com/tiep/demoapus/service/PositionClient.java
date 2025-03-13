@@ -1,13 +1,14 @@
 package com.tiep.demoapus.service;
 
 import com.tiep.demoapus.dto.response.PositionResponseDTO;
+import com.tiep.demoapus.service.ServiceImp.FeignClientConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import java.util.List;
 
-@FeignClient(name = "positionService", url = "${external.apis.position}")
+@FeignClient(name = "positionClient", url = "${external.apis.position}", configuration = FeignClientConfiguration.class)
 public interface PositionClient {
-    @GetMapping("/position/list")
-    List<PositionResponseDTO> getPositionsByIds(@RequestParam("ids") List<Long> ids);
+    @GetMapping
+    PositionResponseDTO getPositionsById(@RequestParam("positionId") Long id);
 }
+

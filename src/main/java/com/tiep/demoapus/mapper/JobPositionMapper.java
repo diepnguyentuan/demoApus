@@ -10,7 +10,8 @@ import org.mapstruct.Mapping;
 public interface JobPositionMapper {
 
     @Mapping(target = "industry", source = "industryEntity")
-    @Mapping(target = "jobPositionMaps", ignore = true)
+    // Không map field "lines" (sẽ được set lại trong service)
+    @Mapping(target = "lines", ignore = true)
     JobPositionResponseDTO toDto(JobPositionEntity entity);
 
     JobPositionEntity toEntity(JobPositionRequestDTO dto);

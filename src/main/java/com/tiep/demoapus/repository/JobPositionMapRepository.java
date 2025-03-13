@@ -8,4 +8,6 @@ import java.util.List;
 public interface JobPositionMapRepository extends JpaRepository<JobPositionMapEntity, Long> {
     List<JobPositionMapEntity> findByJobPositionId(Long jobPositionId);
     void deleteByJobPositionId(Long id);
+
+    List<JobPositionMapEntity> findByJobPosition_Id(Long id);
 }

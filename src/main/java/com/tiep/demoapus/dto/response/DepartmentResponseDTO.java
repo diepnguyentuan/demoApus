@@ -2,7 +2,7 @@ package com.tiep.demoapus.dto.response;
 
 import lombok.*;
 
-
+@Data
 @Getter
 @Setter
 @AllArgsConstructor

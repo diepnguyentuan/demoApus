@@ -1,16 +1,11 @@
 package com.tiep.demoapus.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DepartmentListResponse {
-    private List<DepartmentResponseDTO> data;
+    private List<DepartmentResponseDTO> content;
 }

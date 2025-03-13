@@ -5,6 +5,7 @@ import com.tiep.demoapus.dto.response.*;
 import com.tiep.demoapus.entity.IndustryEntity;
 import com.tiep.demoapus.entity.JobPositionEntity;
 import com.tiep.demoapus.entity.JobPositionMapEntity;
+import com.tiep.demoapus.mapper.JobPositionMapMapper;
 import com.tiep.demoapus.mapper.JobPositionMapper;
 import com.tiep.demoapus.repository.IndustryRepository;
 import com.tiep.demoapus.repository.JobPositionMapRepository;
@@ -33,10 +34,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JobPositionServiceImpl implements JobPositionService {
 
-    private final JobPositionRepository jobPositionRepository;
     private final IndustryRepository industryRepository;
+
+    private final JobPositionRepository jobPositionRepository;
+
     private final JobPositionMapRepository jobPositionMapRepository;
+
     private final JobPositionMapper jobPositionMapper;
+
+    private final JobPositionMapMapper jobPositionMapMapper;
 
     private final DepartmentClient departmentClient;
     private final PositionClient positionClient;
@@ -109,50 +115,33 @@ public class JobPositionServiceImpl implements JobPositionService {
 
     @Override
     public JobPositionResponseDTO getJobPositionById(Long id) {
-        JobPositionEntity entity = jobPositionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job Position not found"));
+        // 1. Lấy JobPositionEntity theo id
+        JobPositionEntity jobPositionEntity = jobPositionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("JobPosition không tồn tại"));
 
-        // Ánh xạ entity sang DTO
-        JobPositionResponseDTO dto = jobPositionMapper.toDto(entity);
+        // 2. Map sang DTO cơ bản – lưu ý mapper của bạn sẽ ignore trường liên quan đến map (jobPositionMaps)
+        JobPositionResponseDTO responseDTO = jobPositionMapper.toDto(jobPositionEntity);
 
-        List<JobPositionMapResponseDTO> mappings = dto.getJobPositionMaps();
-        if (mappings != null && !mappings.isEmpty()) {
-            // Lấy các id duy nhất của department và position từ mapping
-            List<Long> deptIds = mappings.stream()
-                    .map(map -> map.getDepartment().getId())
-                    .distinct()
-                    .collect(Collectors.toList());
+        // 3. Lấy danh sách map từ repository sử dụng tên method đúng
+        List<JobPositionMapEntity> mapEntities = jobPositionMapRepository.findByJobPosition_Id(id);
 
-            List<Long> posIds = mappings.stream()
-                    .map(map -> map.getPosition().getId())
-                    .distinct()
-                    .collect(Collectors.toList());
+        // 4. Với mỗi mapEntity, gọi Feign Client để lấy chi tiết department và position,
+        // và xây dựng DTO cho “line”
+//        List<JobPositionLineDTO> lines = mapEntities.stream().map(mapEntity -> {
+//            DepartmentResponseDTO departmentDTO = departmentClient.getDepartmentById(mapEntity.getDepartmentId());
+//            PositionResponseDTO positionDTO = positionClient.getPositionsById(mapEntity.getPositionId());
+//            JobPositionLineDTO lineDTO = new JobPositionLineDTO();
+//            lineDTO.setDepartment(departmentDTO);
+//            lineDTO.setPosition(positionDTO);
+//            return lineDTO;
+//        }).collect(Collectors.toList());
 
-            // Gọi API lấy thông tin đầy đủ từ các service bên ngoài
-            List<DepartmentResponseDTO> departments = departmentClient.getDepartmentsByIds(deptIds);
-            List<PositionResponseDTO> positions = positionClient.getPositionsByIds(posIds);
+        // 5. Set danh sách lines vào DTO
+//        responseDTO.setLines(lines);
 
-            // Tạo map tra cứu theo id
-            Map<Long, DepartmentResponseDTO> deptMap = departments.stream()
-                    .collect(Collectors.toMap(DepartmentResponseDTO::getId, d -> d));
-
-            Map<Long, PositionResponseDTO> posMap = positions.stream()
-                    .collect(Collectors.toMap(PositionResponseDTO::getId, p -> p));
-
-            // Cập nhật thông tin name cho từng mapping
-            mappings.forEach(map -> {
-                Long deptId = map.getDepartment().getId();
-                Long posId = map.getPosition().getId();
-                if (deptMap.containsKey(deptId)) {
-                    map.getDepartment().setName(deptMap.get(deptId).getName());
-                }
-                if (posMap.containsKey(posId)) {
-                    map.getPosition().setName(posMap.get(posId).getName());
-                }
-            });
-        }
-        return dto;
+        return responseDTO;
     }
+
 
 
     /**

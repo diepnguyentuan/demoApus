@@ -4,8 +4,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import com.tiep.demoapus.dto.response.JobPositionMapResponseDTO;
 import com.tiep.demoapus.dto.response.JobPositionResponseDTO;
-import com.tiep.demoapus.dto.response.DepartmentResponseDTO;
-import com.tiep.demoapus.dto.response.PositionResponseDTO;
 import com.tiep.demoapus.entity.JobPositionEntity;
 import com.tiep.demoapus.entity.JobPositionMapEntity;
 
@@ -13,13 +11,12 @@ import com.tiep.demoapus.entity.JobPositionMapEntity;
 public interface JobPositionMapMapper {
 
     @Mapping(target = "jobPosition", expression = "java(shallowJobPosition(entity.getJobPosition()))")
-    @Mapping(target = "department", expression = "java(new com.tiep.demoapus.dto.response.DepartmentResponseDTO(entity.getDepartmentId(), null))")
-    @Mapping(target = "position", expression = "java(new com.tiep.demoapus.dto.response.PositionResponseDTO(entity.getPositionId(), null))")
+    // Ignore department và position vì sẽ lấy lại từ external API trong service
+    @Mapping(target = "department", ignore = true)
+    @Mapping(target = "position", ignore = true)
     JobPositionMapResponseDTO toDto(JobPositionMapEntity entity);
 
-
-    // Phương thức mapping nông: chỉ map các trường cơ bản của JobPositionEntity,
-    // bỏ qua ánh xạ jobPositionMaps để phá vỡ vòng lặp.
+    // Phương thức hỗ trợ ánh xạ nông của JobPositionEntity
     default JobPositionResponseDTO shallowJobPosition(JobPositionEntity entity) {
         if (entity == null) {
             return null;
@@ -32,8 +29,8 @@ public interface JobPositionMapMapper {
         dto.setActive(entity.getActive());
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
-        // Phá vỡ vòng lặp: không map trường jobPositionMaps
-        dto.setJobPositionMaps(null);
+        // Set trường lines là null để tránh vòng lặp
+        dto.setLines(null);
         return dto;
     }
 }

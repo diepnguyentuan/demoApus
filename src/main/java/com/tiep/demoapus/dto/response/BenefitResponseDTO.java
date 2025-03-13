@@ -17,9 +17,6 @@ public class BenefitResponseDTO {
     private String content;
     @JsonProperty("isActive")
     private Boolean active;
-    private List<DepartmentResponseDTO> departments;
-
-    public BenefitResponseDTO(Long id) {
-        this.id = id;
-    }
+    // Danh sách các department (lines)
+    private List<DepartmentResponseDTO> lines;
 }

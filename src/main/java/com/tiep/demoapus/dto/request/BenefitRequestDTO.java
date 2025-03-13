@@ -23,5 +23,5 @@ public class BenefitRequestDTO {
     private String content;
     @JsonProperty("isActive")
     private Boolean active;
-    private List<DepartmentDTO> departmentId;
+    private List<Long> departmentIds;
 }
