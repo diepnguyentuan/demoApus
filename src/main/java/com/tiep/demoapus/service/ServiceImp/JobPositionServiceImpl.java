@@ -21,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -30,15 +29,10 @@ import java.util.*;
 public class JobPositionServiceImpl implements JobPositionService {
 
     private final IndustryRepository industryRepository;
-
     private final JobPositionRepository jobPositionRepository;
-
     private final JobPositionMapRepository jobPositionMapRepository;
-
     private final JobPositionMapper jobPositionMapper;
-
     private final JobPositionMapMapper jobPositionMapMapper;
-
     private final DepartmentClientForJobPosition departmentClient;
     private final PositionClient positionClient;
 
@@ -46,7 +40,7 @@ public class JobPositionServiceImpl implements JobPositionService {
     @Transactional
     public JobPositionResponseDTO addJobPosition(JobPositionRequestDTO dto) {
         var industry = industryRepository.findById(dto.getIndustryJob().getId())
-                .orElseThrow(() -> new RuntimeException("Industry not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Industry not found"));
 
         var entity = jobPositionMapper.toEntity(dto);
         entity.setIndustryEntity(industry);
@@ -62,28 +56,27 @@ public class JobPositionServiceImpl implements JobPositionService {
 
     @Override
     public PageableResponse<JobPositionResponseDTO> getAllJobPositions(int page, int size, String sort, String search) {
-        // Xác định hướng và trường sắp xếp từ chuỗi sort (ví dụ "createdAt:DESC")
         Sort.Direction direction = sort.endsWith(":DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
         String sortBy = sort.split(":")[0];
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
-        // Lấy trang dữ liệu từ DB
         Page<JobPositionEntity> pageData = jobPositionRepository.findAll(
                 GenericSpecification.searchByCodeOrName(search), pageRequest);
         Page<JobPositionResponseDTO> dtoPage = pageData.map(jobPositionMapper::toDto);
         return PageableResponseUtil.fromPage(dtoPage, sort);
     }
 
-
     @Override
     @Transactional
     public JobPositionResponseDTO updateJobPosition(JobPositionRequestDTO dto) {
         var entity = jobPositionRepository.findById(dto.getId())
-                .orElseThrow(() -> new RuntimeException("JobPosition not found"));
+                .orElseThrow(() -> new EntityNotFoundException("JobPosition not found"));
 
         var industry = industryRepository.findById(dto.getIndustryJob().getId())
-                .orElseThrow(() -> new RuntimeException("Industry not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Industry not found"));
 
+        // Sử dụng mapper để cập nhật các trường từ DTO sang entity
+        jobPositionMapper.updateEntityFromDto(dto, entity);
         entity.setIndustryEntity(industry);
         entity.setUpdatedAt(LocalDateTime.now());
         entity = jobPositionRepository.save(entity);
@@ -104,15 +97,11 @@ public class JobPositionServiceImpl implements JobPositionService {
         jobPositionRepository.deleteById(id);
     }
 
-
     @Override
     @Transactional
     public JobPositionMapResponseDTO getJobPositionById(Long id) {
-        Optional<JobPositionEntity> optionalEntity = jobPositionRepository.findById(id);
-        if (optionalEntity.isEmpty()) {
-            throw new EntityNotFoundException("Job Position không tồn tại với id: " + id);
-        }
-        JobPositionEntity entity = optionalEntity.get();
+        JobPositionEntity entity = jobPositionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Job Position không tồn tại với id: " + id));
 
         JobPositionMapResponseDTO dto = jobPositionMapMapper.toDtoWithLines(entity);
         if (dto.getLines() != null && !dto.getLines().isEmpty()) {
@@ -125,8 +114,6 @@ public class JobPositionServiceImpl implements JobPositionService {
                     DepartmentResponseDTO fullDept = deptResponse.getData().getContent().get(0);
                     line.setDepartment(fullDept);
                 }
-
-                // Enrich thông tin position dựa trên danh sách id
                 List<Long> posIds = line.getPosition().stream()
                         .map(PositionResponseDTO::getId)
                         .toList();
@@ -157,4 +144,3 @@ public class JobPositionServiceImpl implements JobPositionService {
         return mapEntities;
     }
 }
-

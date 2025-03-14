@@ -15,20 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Mapper để ánh xạ dữ liệu từ bảng job_position (chứa thông tin industry)
- * và bảng job_position_map (chỉ chứa mapping giữa department và position)
- * sang DTO JobPositionMapResponseDTO.
- *
- * Lưu ý: Field industry trong JobPositionMapResponseDTO được lấy từ
- * JobPositionEntity.industryEntity (từ bảng job_position) vì job_position_map không có cột industry.
- */
 @Mapper(componentModel = "spring", uses = {IndustryJobMapper.class})
 public interface JobPositionMapMapper {
 
     @Mapping(target = "industry", source = "industryEntity")
-    // Các trường id, code, name, description, active được ánh xạ tự động theo tên.
-    // Field lines sẽ được thiết lập trong default method bên dưới.
     @Mapping(target = "lines", ignore = true)
     JobPositionMapResponseDTO toDto(JobPositionEntity entity);
 
@@ -42,26 +32,23 @@ public interface JobPositionMapMapper {
         if (maps == null || maps.isEmpty()) {
             return Collections.emptyList();
         }
-        // Nhóm các bản ghi theo departmentId.
         Map<Long, List<JobPositionMapEntity>> grouped = maps.stream()
                 .collect(Collectors.groupingBy(JobPositionMapEntity::getDepartmentId));
 
         List<JobPositionLineDTO> lines = new ArrayList<>();
-        for (Map.Entry<Long, List<JobPositionMapEntity>> entry : grouped.entrySet()) {
+        for (Map.Entry<Long, List<JobPositionMapEntity>> departmentEntry : grouped.entrySet()) {
             JobPositionLineDTO line = new JobPositionLineDTO();
-            // Tạo đối tượng DepartmentResponseDTO chỉ với id.
             DepartmentResponseDTO department = new DepartmentResponseDTO();
-            department.setId(entry.getKey());
+            department.setId(departmentEntry.getKey());
             line.setDepartment(department);
 
-            // Ánh xạ danh sách position chỉ với id.
-            List<PositionResponseDTO> positions = entry.getValue().stream()
-                    .map(entity -> {
+            List<PositionResponseDTO> positions = departmentEntry.getValue().stream()
+                    .map(mapEntity -> {
                         PositionResponseDTO pos = new PositionResponseDTO();
-                        pos.setId(entity.getPositionId());
+                        pos.setId(mapEntity.getPositionId());
                         return pos;
                     })
-                    .collect(Collectors.toList());
+                    .toList();
             line.setPosition(positions);
             lines.add(line);
         }
