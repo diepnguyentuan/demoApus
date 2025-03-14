@@ -1,5 +1,5 @@
 
-package com.tiep.demoapus.service.ServiceImp;
+package com.tiep.demoapus.feignClient;
 
 import feign.Logger;
 import feign.RequestInterceptor;

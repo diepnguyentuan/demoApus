@@ -10,7 +10,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface BenefitMapper {
@@ -36,7 +35,7 @@ public interface BenefitMapper {
                     deptDto.setId(mapEntity.getDepartmentId());
                     return deptDto;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Named("convertDepartmentIdsToBenefitMapEntities")
@@ -50,6 +49,6 @@ public interface BenefitMapper {
                     mapEntity.setDepartmentId(id);
                     return mapEntity;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 }

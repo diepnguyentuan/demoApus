@@ -19,4 +19,8 @@ public class BenefitResponseDTO {
     private Boolean active;
     // Danh sách các department (lines)
     private List<DepartmentResponseDTO> lines;
+
+    public BenefitResponseDTO(Long id) {
+        this.id = id;
+    }
 }

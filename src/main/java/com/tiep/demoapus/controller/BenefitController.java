@@ -8,9 +8,12 @@ import com.tiep.demoapus.service.BenefitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @RestController
@@ -18,6 +21,17 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class BenefitController {
     private final BenefitService benefitService;
+    private final MessageSource messageSource;
+
+    @GetMapping("/{id}/localized")
+    public ResponseEntity<Map<String, Object>> getLocalizedBenefit(@PathVariable Long id, Locale locale) {
+        BenefitResponseDTO benefit = benefitService.getBenefitById(id);
+        String localizedMessage = messageSource.getMessage("benefit.greeting", new Object[]{benefit.getName()}, locale);
+        Map<String, Object> response = new HashMap<>();
+        response.put("benefit", benefit);
+        response.put("message", localizedMessage);
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/list")
     public ResponseEntity<?> listBenefits(

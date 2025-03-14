@@ -1,9 +1,15 @@
 package com.tiep.demoapus.dto.response;
 
-import lombok.Data;
+import lombok.*;
+
+import java.util.List;
 
 @Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class JobPositionLineDTO {
     private DepartmentResponseDTO department;
-    private PositionResponseDTO position;
+    private List<PositionResponseDTO> position;
 }

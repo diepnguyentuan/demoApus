@@ -1,4 +1,4 @@
-package com.tiep.demoapus.dto.response;
+package com.tiep.demoapus.feignClient;
 
 import lombok.Data;
 

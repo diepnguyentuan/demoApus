@@ -1,22 +1,19 @@
 package com.tiep.demoapus.service.ServiceImp;
 
 import com.tiep.demoapus.dto.request.BenefitRequestDTO;
-import com.tiep.demoapus.dto.response.ApiResponse;
-import com.tiep.demoapus.dto.response.BenefitResponseDTO;
-import com.tiep.demoapus.dto.response.DepartmentListResponse;
-import com.tiep.demoapus.dto.response.DepartmentResponseDTO;
-import com.tiep.demoapus.dto.response.PageableResponse;
-import com.tiep.demoapus.dto.response.PageableResponseUtil;
+import com.tiep.demoapus.dto.response.*;
 import com.tiep.demoapus.entity.BenefitEntity;
 import com.tiep.demoapus.entity.BenefitMapEntity;
+import com.tiep.demoapus.feignClient.ApiResponse;
 import com.tiep.demoapus.mapper.BenefitMapper;
 import com.tiep.demoapus.repository.BenefitMapRepository;
 import com.tiep.demoapus.repository.BenefitRepository;
 import com.tiep.demoapus.service.BenefitService;
-import com.tiep.demoapus.service.DepartmentClient;
+import com.tiep.demoapus.feignClient.DepartmentClient;
 import com.tiep.demoapus.specification.GenericSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -94,6 +91,14 @@ public class BenefitServiceImpl implements BenefitService {
                 dtoList.forEach(dto -> dto.setLines(List.of()));
             }
         }
+        Page<BenefitResponseDTO> dtoPage = new PageImpl<>(
+                dtoList,          // content
+                pageRequest,      // thông tin paging
+                entityPage.getTotalElements() // tổng số bản ghi
+        );
+
+        return PageableResponseUtil.fromPage(dtoPage, sort);
+
     }
 
     @Override
@@ -131,17 +136,18 @@ public class BenefitServiceImpl implements BenefitService {
             benefitEntity.getMaps().forEach(map -> map.setBenefit(benefitEntity));
         }
         BenefitEntity savedEntity = benefitRepository.save(benefitEntity);
-        return benefitMapper.toDto(savedEntity);
+        return new BenefitResponseDTO(savedEntity.getId());
     }
 
     @Override
     public BenefitResponseDTO updateBenefit(BenefitRequestDTO benefitRequestDTO) {
-        BenefitEntity benefitEntity = benefitMapper.toEntity(benefitRequestDTO);
+        BenefitEntity benefitEntity = benefitRepository.findById(benefitRequestDTO.getId())
+                .orElseThrow(() -> new RuntimeException("Benefit not found"));
         if (benefitEntity.getMaps() != null) {
             benefitEntity.getMaps().forEach(map -> map.setBenefit(benefitEntity));
         }
         BenefitEntity savedEntity = benefitRepository.save(benefitEntity);
-        return benefitMapper.toDto(savedEntity);
+        return new BenefitResponseDTO(savedEntity.getId());
     }
 
     @Override

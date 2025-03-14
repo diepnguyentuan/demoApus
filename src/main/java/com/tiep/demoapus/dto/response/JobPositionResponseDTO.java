@@ -23,8 +23,6 @@ public class JobPositionResponseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private List<JobPositionLineDTO> lines;
-
     public JobPositionResponseDTO(Long id) {
         this.id = id;
     }

@@ -2,33 +2,28 @@ package com.tiep.demoapus.service.ServiceImp;
 
 import com.tiep.demoapus.dto.request.JobPositionRequestDTO;
 import com.tiep.demoapus.dto.response.*;
-import com.tiep.demoapus.entity.IndustryEntity;
 import com.tiep.demoapus.entity.JobPositionEntity;
 import com.tiep.demoapus.entity.JobPositionMapEntity;
+import com.tiep.demoapus.exception.EntityNotFoundException;
+import com.tiep.demoapus.feignClient.ApiResponse;
+import com.tiep.demoapus.feignClient.DepartmentClientForJobPosition;
 import com.tiep.demoapus.mapper.JobPositionMapMapper;
 import com.tiep.demoapus.mapper.JobPositionMapper;
 import com.tiep.demoapus.repository.IndustryRepository;
 import com.tiep.demoapus.repository.JobPositionMapRepository;
 import com.tiep.demoapus.repository.JobPositionRepository;
-import com.tiep.demoapus.service.DepartmentClient;
 import com.tiep.demoapus.service.JobPositionService;
-import com.tiep.demoapus.service.PositionClient;
+import com.tiep.demoapus.feignClient.PositionClient;
 import com.tiep.demoapus.specification.GenericSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +39,7 @@ public class JobPositionServiceImpl implements JobPositionService {
 
     private final JobPositionMapMapper jobPositionMapMapper;
 
-    private final DepartmentClient departmentClient;
+    private final DepartmentClientForJobPosition departmentClient;
     private final PositionClient positionClient;
 
     @Override
@@ -62,8 +57,6 @@ public class JobPositionServiceImpl implements JobPositionService {
         if (dto.getDepartmentPositions() != null) {
             jobPositionMapRepository.saveAll(buildMapEntities(entity, dto));
         }
-
-        // Chỉ trả về DTO chứa ID (nếu muốn đầy đủ, hãy mapper)
         return new JobPositionResponseDTO(entity.getId());
     }
 
@@ -96,7 +89,6 @@ public class JobPositionServiceImpl implements JobPositionService {
         entity = jobPositionRepository.save(entity);
 
         if (dto.getDepartmentPositions() != null) {
-            jobPositionMapRepository.deleteByJobPositionId(dto.getId());
             jobPositionMapRepository.saveAll(buildMapEntities(entity, dto));
         }
         return new JobPositionResponseDTO(entity.getId());
@@ -106,7 +98,7 @@ public class JobPositionServiceImpl implements JobPositionService {
     @Transactional
     public void deleteJobPosition(Long id) {
         if (!jobPositionRepository.existsById(id)) {
-            throw new RuntimeException("JobPosition not found");
+            throw new EntityNotFoundException("JobPosition not found");
         }
         jobPositionMapRepository.deleteByJobPositionId(id);
         jobPositionRepository.deleteById(id);
@@ -114,39 +106,41 @@ public class JobPositionServiceImpl implements JobPositionService {
 
 
     @Override
-    public JobPositionResponseDTO getJobPositionById(Long id) {
-        // 1. Lấy JobPositionEntity theo id
-        JobPositionEntity jobPositionEntity = jobPositionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("JobPosition không tồn tại"));
+    @Transactional
+    public JobPositionMapResponseDTO getJobPositionById(Long id) {
+        Optional<JobPositionEntity> optionalEntity = jobPositionRepository.findById(id);
+        if (optionalEntity.isEmpty()) {
+            throw new EntityNotFoundException("Job Position không tồn tại với id: " + id);
+        }
+        JobPositionEntity entity = optionalEntity.get();
 
-        // 2. Map sang DTO cơ bản – lưu ý mapper của bạn sẽ ignore trường liên quan đến map (jobPositionMaps)
-        JobPositionResponseDTO responseDTO = jobPositionMapper.toDto(jobPositionEntity);
+        JobPositionMapResponseDTO dto = jobPositionMapMapper.toDtoWithLines(entity);
+        if (dto.getLines() != null && !dto.getLines().isEmpty()) {
+            for (JobPositionLineDTO line : dto.getLines()) {
+                Long deptId = line.getDepartment().getId();
+                ApiResponse<DepartmentListResponse> deptResponse =
+                        departmentClient.getDepartmentsByIds(Collections.singletonList(deptId));
+                if (deptResponse != null && deptResponse.getData() != null
+                        && !deptResponse.getData().getContent().isEmpty()) {
+                    DepartmentResponseDTO fullDept = deptResponse.getData().getContent().get(0);
+                    line.setDepartment(fullDept);
+                }
 
-        // 3. Lấy danh sách map từ repository sử dụng tên method đúng
-        List<JobPositionMapEntity> mapEntities = jobPositionMapRepository.findByJobPosition_Id(id);
-
-        // 4. Với mỗi mapEntity, gọi Feign Client để lấy chi tiết department và position,
-        // và xây dựng DTO cho “line”
-//        List<JobPositionLineDTO> lines = mapEntities.stream().map(mapEntity -> {
-//            DepartmentResponseDTO departmentDTO = departmentClient.getDepartmentById(mapEntity.getDepartmentId());
-//            PositionResponseDTO positionDTO = positionClient.getPositionsById(mapEntity.getPositionId());
-//            JobPositionLineDTO lineDTO = new JobPositionLineDTO();
-//            lineDTO.setDepartment(departmentDTO);
-//            lineDTO.setPosition(positionDTO);
-//            return lineDTO;
-//        }).collect(Collectors.toList());
-
-        // 5. Set danh sách lines vào DTO
-//        responseDTO.setLines(lines);
-
-        return responseDTO;
+                // Enrich thông tin position dựa trên danh sách id
+                List<Long> posIds = line.getPosition().stream()
+                        .map(PositionResponseDTO::getId)
+                        .toList();
+                ApiResponse<PositionListResponse> posResponse = positionClient.getPositionsByIds(posIds);
+                if (posResponse != null && posResponse.getData() != null) {
+                    line.setPosition(posResponse.getData().getContent());
+                } else {
+                    line.setPosition(Collections.emptyList());
+                }
+            }
+        }
+        return dto;
     }
 
-
-
-    /**
-     * Lấy danh sách mapEntity từ requestDTO
-     */
     private List<JobPositionMapEntity> buildMapEntities(JobPositionEntity entity, JobPositionRequestDTO dto) {
         List<JobPositionMapEntity> mapEntities = new ArrayList<>();
         dto.getDepartmentPositions().forEach(dp -> {
